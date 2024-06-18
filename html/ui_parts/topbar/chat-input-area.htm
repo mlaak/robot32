@@ -1,0 +1,80 @@
+<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div class="flex-none p-4 bg-white dark:bg-zinc-800 shadow-md flex flex-col md:flex-row items-end md:items-end space-x-2"
+id="chat-input-area">
+<div class="flex-grow relative flex items-center" id="message-input-container">
+ 
+  <button id="microphone-btn"
+    class="p-2 bg-gray-200 dark:bg-gray-700 rounded-md mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    aria-label="Speak">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3m0 0A3 3 0 0111 4m6 0a6 6 0 016 6" />
+    </svg>
+  </button>
+  
+  <div class="relative w-full" id="message-input-wrapper">
+   
+    <textarea style="min-height:87px" id="message-box" placeholder="Type a message..."
+      class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:placeholder-zinc-400 dark:text-white pr-12 text-lg resize-none overflow-hidden"></textarea>
+      
+    <label
+      class="absolute right-2 bottom-2 p-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white rounded-md shadow-md cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+      id="file-upload-label">
+      <input type="file" class="hidden" id="file-upload-input" />
+      <img aria-hidden="true" alt="upload" src="https://placehold.co/20x20?text=📤" />
+    </label>
+    
+  </div>
+</div>        
+
+
+<div class="flex flex-col w-full md:w-auto mt-2 md:mt-0 space-y-2 md:space-y-0" id="chat-options">
+  
+  <select
+    class="p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white text-lg w-full md:w-auto"
+    id="model-select">
+    <option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>
+    <option value="routers/openrouter/openrouter.php?model=mistralai/mixtral-8x22b-instruct">R32-L</option>
+    <option value="routers/openrouter/openrouter.php?model=openai/gpt-4o-2024-05-13">GPT-4o</option>
+    <option value="routers/openrouter/openrouter.php?model=google/gemini-flash-1.5">Gemini-F</option>
+    <option value="routers/openrouter/openrouter.php?model=mistralai/mistral-large">Mistr-L</option>
+  </select>
+  
+  <button style="margin-top:7px"
+    class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto"
+    id="run-button" onclick="run_message(document.getElementById('message-box').value);document.getElementById('message-box').value='';">RUN</button>
+    
+</div>
+</div>
+
+<script> 
+const messageBox = document.getElementById('message-box');
+
+// Automatically adjust input box height
+messageBox.addEventListener('input', () => {
+  console.log("?");
+  messageBox.style.height = 'auto';
+  let h = messageBox.scrollHeight;
+  if(h>400)h=400;
+  messageBox.style.height = h + 'px';
+  
+  
+});
+
+// Ctrl+Enter = RUN
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' && event.ctrlKey) {
+    console.log('Ctrl+Enter pressed');
+        run_message(document.getElementById('message-box').value);
+  }
+});
+
+
+</script>
+
+<!-- end of file -->
+
+
