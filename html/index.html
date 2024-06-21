@@ -6,10 +6,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chat Interface</title>
-  <script src="	https://cdn.tailwindcss.com/3.4.3"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.3"></script>
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-900">
+
   <div class="flex flex-col md:flex-row h-screen">
+    
     <div class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4" id="sidebar">
       <div class="flex justify-between items-center md:block">
         <div class="text-lg font-semibold text-zinc-800 dark:text-zinc-200" id="sidebar-title">Menu</div>
@@ -18,7 +20,11 @@
           ☰
         </button>
       </div>
-      <ul class="space-y-2 mt-4 md:mt-0 hidden md:block" id="sidebar-menu">
+      
+      <!--    <script src="https://cdn.tailwindcss.com/3.4.3"></script>
+    <!-- dont remove this comment here -->
+    <div class="">
+     <ul class="space-y-2 mt-4 md:mt-0 hidden md:block" id="sidebar-menu">
         <li><a href="#"
             class="block p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200"
             id="sidebar-home-link">Home</a></li>
@@ -32,50 +38,97 @@
             class="block p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-800 dark:text-zinc-200"
             id="sidebar-logout-link">Logout</a></li>
       </ul>
+     </div> 
     </div>
 
     <div class="flex flex-col flex-1" id="main-content">
-      <div class="flex-none p-4 bg-white dark:bg-zinc-800 shadow-md flex flex-col md:flex-row items-end md:items-end space-x-2"
-        id="chat-input-area">
-        <div class="flex-grow relative flex items-center" id="message-input-container">
-          <button id="microphone-btn"
-            class="p-2 bg-gray-200 dark:bg-gray-700 rounded-md mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Speak">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none"
-              viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3m0 0A3 3 0 0111 4m6 0a6 6 0 016 6" />
-            </svg>
-          </button>
-          <div class="relative w-full" id="message-input-wrapper">
-            <textarea style="min-height:87px" id="message-box" placeholder="Type a message..."
-              class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:placeholder-zinc-400 dark:text-white pr-12 text-lg resize-none overflow-hidden"></textarea>
-            <label
-              class="absolute right-2 bottom-2 p-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white rounded-md shadow-md cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
-              id="file-upload-label">
-              <input type="file" class="hidden" id="file-upload-input" />
-              <img aria-hidden="true" alt="upload" src="https://placehold.co/20x20?text=📤" />
-            </label>
-          </div>
-        </div>
-        <div class="flex flex-col w-full md:w-auto mt-2 md:mt-0 space-y-2 md:space-y-0" id="chat-options">
-          <select
-            class="p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white text-lg w-full md:w-auto"
-            id="model-select">
-            <option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>
-            <option value="routers/openrouter/openrouter.php?model=mistralai/mixtral-8x22b-instruct">R32-L</option>
-            <option value="routers/openrouter/openrouter.php?model=openai/gpt-4o-2024-05-13">GPT-4o</option>
-            <option value="routers/openrouter/openrouter.php?model=google/gemini-flash-1.5">Gemini-F</option>
-            <option value="routers/openrouter/openrouter.php?model=mistralai/mistral-large">Mistr-L</option>
-            
-            
-          </select>
-          <button style="margin-top:7px"
-            class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto"
-            id="run-button" onclick="run_message(document.getElementById('message-box').value);document.getElementById('message-box').value='';">RUN</button>
-        </div>
-      </div>
-      <a href="#" id="more-options-link" class="block text-blue-500 dark:text-blue-300 mt-2 ml-4">More options >></a>
+      
+      <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div class="flex-none p-4 bg-white dark:bg-zinc-800 shadow-md flex flex-col md:flex-row items-end md:items-end space-x-2"
+id="chat-input-area">
+<div class="flex-grow relative flex items-center" id="message-input-container">
+ 
+  <button id="microphone-btn"
+    class="p-2 bg-gray-200 dark:bg-gray-700 rounded-md mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    aria-label="Speak">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none"
+      viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3m0 0A3 3 0 0111 4m6 0a6 6 0 016 6" />
+    </svg>
+  </button>
+  
+  <div class="relative w-full" id="message-input-wrapper">
+   
+    <textarea style="min-height:87px" id="message-box" placeholder="Type a message..."
+      class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:placeholder-zinc-400 dark:text-white pr-12 text-lg resize-none overflow-hidden"></textarea>
+      
+    <label
+      class="absolute right-2 bottom-2 p-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white rounded-md shadow-md cursor-pointer hover:bg-zinc-300 dark:hover:bg-zinc-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center space-x-2"
+      id="file-upload-label">
+      <input type="file" class="hidden" id="file-upload-input" />
+      <img aria-hidden="true" alt="upload" src="https://placehold.co/20x20?text=📤" />
+    </label>
+    
+  </div>
+</div>        
+
+
+<div class="flex flex-col w-full md:w-auto mt-2 md:mt-0 space-y-2 md:space-y-0" id="chat-options">
+  
+  <select
+    class="p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white text-lg w-full md:w-auto"
+    id="model-select">
+    <option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>
+    <option value="routers/openrouter/openrouter.php?model=mistralai/mixtral-8x22b-instruct">R32-L</option>
+    <option value="routers/openrouter/openrouter.php?model=openai/gpt-4o-2024-05-13">GPT-4o</option>
+    <option value="routers/openrouter/openrouter.php?model=google/gemini-flash-1.5">Gemini-F</option>
+    <option value="routers/openrouter/openrouter.php?model=perplexity/llama-3-sonar-large-32k-online">Perplexity</option>
+    <option value="routers/openrouter/openrouter.php?model=anthropic/claude-3.5-sonnet">Claude-3.5</option>    
+  </select>
+  
+  <button style="margin-top:7px"
+    class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto"
+    id="run-button" onclick="run_message(document.getElementById('message-box').value);document.getElementById('message-box').value='';">RUN</button>
+    
+</div>
+</div>
+
+<script> 
+const messageBox = document.getElementById('message-box');
+
+// Automatically adjust input box height
+messageBox.addEventListener('input', () => {
+  console.log("?");
+  messageBox.style.height = 'auto';
+  let h = messageBox.scrollHeight;
+  if(h>400)h=400;
+  messageBox.style.height = h + 'px';
+  
+  
+});
+
+// Ctrl+Enter = RUN
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' && event.ctrlKey) {
+    console.log('Ctrl+Enter pressed');
+        run_message(document.getElementById('message-box').value);
+  }
+});
+
+
+</script>
+
+<!-- end of file -->
+
+
+ 
+      <!--    <script src="https://cdn.tailwindcss.com/3.4.3"></script>
+    <!-- dont remove this comment here -->
+    
+    <a href="#" id="more-options-link" class="block text-blue-500 dark:text-blue-300 mt-2 ml-4">More options >></a>
       <div id="more-options" class="hidden mt-2 space-y-2 ml-4">
         <label class="flex items-center space-x-2" id="option1-label">
           <input type="checkbox" class="form-checkbox text-blue-500 dark:text-blue-300" id="option1-checkbox" />
@@ -90,7 +143,19 @@
           <span class="text-zinc-800 dark:text-zinc-200">Option 3</span>
         </label>
       </div>
+      
+    <script>
+    document.getElementById('more-options-link').addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('more-options').classList.toggle('hidden');
+    });
+    </script> 
+  
+
+
       <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages-area">
+
+
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md text-lg" id="initial-message">
           <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today?</p>
         </div>
@@ -100,12 +165,9 @@
           <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg " id="user-message">
             <p>What is robot32-chat and what can I do with it.</p>
           </div>
-          
-          <!--<div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex items-start space-x-4 text-lg "
-            id="gpt-message"> -->
+
           <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message">  
-            
-            <img src="welcome2.jpg" width="200" height="200" alt="generated image"
+            <img src="/welcome2.jpg" width="200" height="200" alt="generated image"
               class="rounded-md shadow-md cursor-pointer" id="gpt-image-0" />
               <pre style = "white-space: pre-wrap" ><p class="text-zinc-800 dark:text-zinc-200">Robot32-chat is large language model based on open source LLM. 
 Type in your question (or picture idea) and hit the RUN button.
@@ -120,22 +182,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
             </pre>
             </p>
           </div>
-          
-          <!--<div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message">
-  <img src="welcome2.jpg" width="200" height="200" alt="generated image" class="rounded-md shadow-md cursor-pointer" id="gpt-image-0" />
-  <pre style="white-space: pre-wrap"><p class="text-zinc-800 dark:text-zinc-200">Robot32-chat is large language model based on open source LLM. 
-Type in your question (or picture idea) and hit the RUN button.
-You can try:  
-  What is the capital of Sweden?  
-  What is the smallest whale?  
-  Make me pythonc function that sorts custom objects be given param.  
-  A serene forest landscape at sunset, glassy lake reflecting the sky.  
-  A surreal, dreamlike landscape with floating islands.          
-  
-Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
-    </p>
-  </pre>
-</div>-->
+        
           
           
           
@@ -261,7 +308,6 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
   
   
     function run_message(message){
-        
         let reqno = add_interaction(message);
         
         let messageBox = document.getElementById("message-box");
@@ -374,26 +420,9 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     }
     make_modal(0);
 
-    const messageBox = document.getElementById('message-box');
-    messageBox.addEventListener('input', () => {
-      messageBox.style.height = 'auto';
-      let h = messageBox.scrollHeight;
-      if(h>400)h=400;
-      messageBox.style.height = h + 'px';
-      
-    });
     
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' && event.ctrlKey) {
-        console.log('Ctrl+Enter pressed');
-            run_message(document.getElementById('message-box').value);
-      }
-    });
 
-    document.getElementById('more-options-link').addEventListener('click', (e) => {
-      e.preventDefault();
-      document.getElementById('more-options').classList.toggle('hidden');
-    });
+
 
     // Speech-to-text
     const microphoneBtn = document.getElementById('microphone-btn');
