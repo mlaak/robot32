@@ -1,5 +1,7 @@
 <?php
 
+require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
+
 $OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));
 
 $url = "https://openrouter.ai/api/v1/chat/completions";
@@ -26,7 +28,6 @@ $data = [
     "top_p"=> 1,
     "stream"=> true,
     "stop"=> null
-
 ];
 
 
