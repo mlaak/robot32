@@ -226,7 +226,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         //fetch('groq.php?content='+message)
         
         
-        fetch(llm_url+'&content='+encodeURIComponent(message))
+        fetch(llm_url+'&content='+encodeURIComponent(message),{credentials: "same-origin"})
         //fetch('tes.php?content='+message)
           .then(response => {
             if (!response.ok) {

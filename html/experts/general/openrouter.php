@@ -1,7 +1,10 @@
 <?php
 ignore_user_abort(true); //NB, otherwise might skip billing
+require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
 require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
+
+
 
 $OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));       
 $headers = [
@@ -31,8 +34,20 @@ $r = $ai->chat($content,$model,$options,function($txt,$data){
 //$r = $ai->chat($_REQUEST["content"],$_REQUEST["model"],$history);
 
 
+
+
+require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
+
+$logger = new Robot32lib\ULogger\ULogger();
+
+
+//print_r($r['data']['usage']['completion_tokens']);
+
+$logger->log($content,$model,$r['text'],$r['data']['id'],$r['data']['usage']['prompt_tokens'],$r['data']['usage']['completion_tokens'],$r['cost']);
+
+
 // ********************************** LOG IT *****************************
-$currentTime = time();
+/*$currentTime = time();
 $year = date('Y', $currentTime);
 $month = date('m', $currentTime);
 $day = date('d', $currentTime);
@@ -44,6 +59,6 @@ $time = "$year.$month.$day..$hour.$minute.$second";
 $filename = $time . "___" . microtime(true);
 $filename = str_replace(".", "_", $filename); // replace the decimal with an underscore
 file_put_contents(__DIR__."/../../../collected_data/chats/".$filename.".txt", "Model: $model\n\n"."Query:\n".$content."\n\n\nResult:\n".$r['text']."\n\nCost:".$r['cost']);
-
+*/
 
 
