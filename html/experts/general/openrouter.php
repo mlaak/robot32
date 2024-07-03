@@ -2,6 +2,8 @@
 ignore_user_abort(true); //NB, otherwise might skip billing
 require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
+header('Content-Type:text/plain'); //NB. avoid xss
+
 require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
 
 
@@ -28,6 +30,7 @@ $content = $_REQUEST["content"];
 $model = $_REQUEST["model"];
 
 $r = $ai->chat($content,$model,$options,function($txt,$data){
+    if(!headers_sent())header("openrouter-id: ".$data['id']);
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
 }); 

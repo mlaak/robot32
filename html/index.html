@@ -350,6 +350,16 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         //fetch('tes.php?content='+message)
           .then(response => {
             if (!response.ok) {
+            
+                console.log(response)
+                 //const decoder = new TextDecoder();
+                let elem = document.getElementById("gpt-text-"+reqno);
+                 const headerString = Array.from(response.headers.entries())
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join('\n');
+                  
+      
+                elem.innerHTML = elem.innerHTML+textToHtml(headerString+"");
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.body;
