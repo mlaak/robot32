@@ -25,7 +25,7 @@ var overallIPLimiter *RateLimiter;
 func main() {
 	// Parse the URL of the Apache server
 	
-	rateLimiter =      NewRateLimiter(  60,  300,  3000,  5,     5000,   50000,   500000)
+	rateLimiter =      NewRateLimiter(  60,  300,  3000, 10,     5000,   50000,   500000)
 	overallIPLimiter = NewRateLimiter(6000,60000,600000,500,   500000, 5000000, 50000000 )
 	
 	apacheURL, err := url.Parse(apacheAddr)

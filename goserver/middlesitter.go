@@ -55,6 +55,8 @@ func (w *ObservableReadCloser) Read(p []byte) (int, error) {
 
 /*
     When stream is closed
+    
+    NB. Might not be called if server error?
 */    
 func (w *ObservableReadCloser) Close() error {
      fmt.Println("CLOSING!")

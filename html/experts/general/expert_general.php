@@ -41,11 +41,7 @@ $r = $ai->chat($content,$model,$options,function($txt,$data){
 
 require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
 
-$logger = new Robot32lib\ULogger\ULogger();
-
-
-//print_r($r['data']['usage']['completion_tokens']);
-
+$logger = new Robot32lib\ULogger\ULogger($BASE_DIR);
 $logger->log($content,$model,$r['text'],$r['data']['id'],$r['data']['usage']['prompt_tokens'],$r['data']['usage']['completion_tokens'],$r['cost']);
 
 

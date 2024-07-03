@@ -1,14 +1,17 @@
 <?php
 
+include __DIR__."/settings.php";
+
 function generateRandomString($length = 32) {
     return bin2hex(random_bytes($length / 2));
 }
 
 
 // Google OAuth 2.0 credentials
-$client_id = trim(file_get_contents(__DIR__."/../keys/google_client_id.txt"));
-$client_secret = trim(file_get_contents(__DIR__."/../keys/google_client_secret.txt"));    
-$redirect_uri = 'http://localhost:8000/google_login.php';
+$client_id = trim(file_get_contents("$BASE_DIR/keys/google_client_id.txt"));
+$client_secret = trim(file_get_contents("$BASE_DIR/keys/google_client_secret.txt"));    
+$redirect_uri = trim(file_get_contents("$BASE_DIR/keys/google_redirect_uri.txt")); 
+//$redirect_uri = 'http://localhost:8000/google_login.php';
 
 // Google OAuth 2.0 endpoints
 $auth_url = 'https://accounts.google.com/o/oauth2/auth';
@@ -73,7 +76,7 @@ if (isset($_GET['code'])) {
             $user_id = $user_data['sub'];
             $user_email = $user_data['email'];
             
-            file_put_contents(__DIR__."/../working_data/sessions/$session_id.txt","$user_id, $user_email");
+            file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","google, goog$user_id, $user_email");
             setcookie("r_ression_id",$session_id);
             header('Location: ' . "index.html");
         } else {

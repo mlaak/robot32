@@ -89,6 +89,7 @@ func (rl *RateLimiter) Allow(ip string, w interface {AddReleaser(func())} ) (boo
 
 	// Reset counter if a minute has passed
 	if lastReset, exists := rl.lastMinuteResetTimes[ip]; !exists || now.Sub(lastReset) > time.Minute {
+		rl.activeSessions[ip] = 0
 		rl.requestMinuteCounts[ip] = 0
 		rl.tokensMinuteCounts[ip] = 0
 		rl.lastMinuteResetTimes[ip] = now
