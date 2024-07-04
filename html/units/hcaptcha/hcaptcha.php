@@ -37,7 +37,7 @@ if(isset($_POST['h-captcha-response'])){
 
         $user_id = $headers["X-Forwarded-For"];
         file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","ip, ipus$user_id, -");
-        setcookie("r_ression_id",$session_id);
+        setcookie("r_ression_id",$session_id,0,"/");
         header('Location: ' . "../index.html");
 
         echo "verify success";

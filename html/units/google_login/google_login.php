@@ -77,7 +77,7 @@ if (isset($_GET['code'])) {
             $user_email = $user_data['email'];
             
             file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","google, goog$user_id, $user_email");
-            setcookie("r_ression_id",$session_id);
+            setcookie("r_ression_id",$session_id,0,"/");
             header('Location: ' . "index.html");
         } else {
             echo "Failed to fetch user information.";

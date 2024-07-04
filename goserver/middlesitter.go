@@ -37,45 +37,9 @@ type ObservableReadCloser struct {
     
     //Functions that need to be executed upon stream close. Used for example by ratelimiter
     releasers []func()
+    streamObservers []func([]byte,int64)
 }
 
-
-/*
-    http body flows through it
-*/
-func (w *ObservableReadCloser) Read(p []byte) (int, error) {
-    n, err := w.ReadCloser.Read(p) // Call the original Read method.
-    if n<1000 {
-        //fmt.Println(p[:n])
-    }
-    w.dataObserved = append(w.dataObserved, p[:n]...)
-    return n, err
-}
-
-
-/*
-    When stream is closed
-    
-    NB. Might not be called if server error?
-*/    
-func (w *ObservableReadCloser) Close() error {
-     fmt.Println("CLOSING!")
-     w.ReleaseAll()
-     //overallIPLimiter.Release("IPS")
-     //rateLimiter.Release(w.ip)
-    return w.ReadCloser.Close() // Call the original Close method.
-}
-
-
-func (w *ObservableReadCloser) ReleaseAll() {
-    for _, releaser := range w.releasers {
-        releaser()
-    }
-}
-
-func (w *ObservableReadCloser) AddReleaser(releasefunc func()) {
-    w.releasers = append(w.releasers, releasefunc)
-}
 
 
 
@@ -88,53 +52,50 @@ func (w *ObservableReadCloser) AddReleaser(releasefunc func()) {
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
     ip := strings.Split(req.RemoteAddr, ":")[0]
+    
     orc := &ObservableReadCloser{ip:ip}
+    orc.request = req.URL.String()
     
-    // **********    Just incase, lets already prepare the error response *******
+    // **********  Select rate limiters based on url and user
+    rateLimiter,coLimiter := RateLimitersSelect(req)
     
-    errorResponse :=  &http.Response{
-        StatusCode: 429,
-        Status:     "Requests limit exeeded (minute or hourly or daily)",
-        Body:       http.NoBody,
-        Header:     make(http.Header),
-    }
-    
-    body := []byte("Requests limit exeeded (minute or hourly or daily)")
-    errorResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-    errorResponse.ContentLength = int64(len(body))
-  
-    
-    // **********   Aplly ratelimiter *******************************************
-    
-    if allowed, ertext := rateLimiter.Allow(ip,orc);!allowed {
-			//http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-	        errorResponse.Header.Set("Error-reason", ertext)		
-			return errorResponse, nil//errors.New("Rate limit exceeded") 
-    }
-        
-    if allowed, ertext := overallIPLimiter.Allow("IPS",orc);!allowed{
-			//http.Error(w, "Rate limit exceeded", http.StatusTooManyRequests)
-			errorResponse.Header.Set("Error-reason", "For all IP users (consider logging in): "+ertext)
-			//rateLimiter.Release(ip)
+       
+    // **********   Aplly ratelimiter ********************************
+    if allowed, ecode, ertext := rateLimiter.Allow(ip,orc);!allowed {       		
 			orc.ReleaseAll()
-			return errorResponse, nil//errors.New("Rate limit exceeded for non-logged in users") 
+			return MakeHttpErrorResponse(ecode,ertext)
+    }
+    if allowed, ecode, ertext := coLimiter.Allow("ALLTOGETHER",orc);!allowed{
+			orc.ReleaseAll()
+			return MakeHttpErrorResponse(ecode,"For all IP (non logged in) users combined (consider logging in):"+ertext);  
     }
     
-
-	// *************** Send the request to the Apache server ***********************
-	
+   
+    
+	// *************** Send the request to the Apache server *********
 	resp, err := t.originalTransport.RoundTrip(req)
 	if err != nil {
+	    orc.ReleaseAll()
 		return nil, err
 	}
 
-	// *************** Send reply back to client ***********************************
+	// *************** Meter bytes? *********************	
+	_, meterBytes := resp.Header["Meter-Bytes"];
+	if meterBytes {
+	    //fmt.Println("Metering bytes")
+	    rateLimiter.Addbytes(ip,req.ContentLength) //can this be tricked by the user?
+	    meterfunc := func(data []byte, n int64){
+	       rateLimiter.Addbytes(ip,n)
+	    }
+	    orc.AddStreamObserver(meterfunc)
+	}
+	
+	// *************** Send reply back to client *********************
+	
 	
 	orc.ReadCloser = resp.Body
+	resp.Body = orc
 	analyzeResponse(resp)
-    orc.request = req.URL.String()
-    orc.ip = ip
-    resp.Body = orc
     
 	return resp, nil
 	
@@ -163,6 +124,74 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 	resp.Body = io.NopCloser(io.NewReader(bodyBytes))
 	*/
 	
-    //return resp, nil
+    return resp, nil
 
+} 
+
+func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
+    errorResponse :=  &http.Response{
+        StatusCode: status,//429,
+        Status:     err,
+        Body:       http.NoBody,
+        Header:     make(http.Header),
+    }    
+    
+    body := []byte(err)
+    errorResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+    errorResponse.ContentLength = int64(len(body))
+    errorResponse.Header.Set("Error-reason", err)    
+    return errorResponse, nil
+    
 }
+
+
+
+
+
+/*
+    http body flows through it
+*/
+func (w *ObservableReadCloser) Read(p []byte) (int, error) {
+    n, err := w.ReadCloser.Read(p) // Call the original Read method.
+    
+    for _, streamObserver := range w.streamObservers {
+        streamObserver(p,int64(n))
+    }
+    
+    if n<1000 {
+        //fmt.Println(p[:n])
+    }
+    w.dataObserved = append(w.dataObserved, p[:n]...)
+    return n, err
+}
+
+
+/*
+    When stream is closed
+    
+    NB. Might not be called if server error?
+*/    
+func (w *ObservableReadCloser) Close() error {
+     fmt.Println("CLOSING!")
+     w.ReleaseAll()
+    return w.ReadCloser.Close() // Call the original Close method.
+}
+
+
+func (w *ObservableReadCloser) ReleaseAll() {
+    for _, releaser := range w.releasers {
+        releaser()
+    }
+}
+
+func (w *ObservableReadCloser) AddReleaser(releasefunc func()) {
+    w.releasers = append(w.releasers, releasefunc)
+}
+
+func (w *ObservableReadCloser) AddStreamObserver(observerfunc func([]byte,int64 )){
+    w.streamObservers = append(w.streamObservers, observerfunc)
+}
+
+
+
+

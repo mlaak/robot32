@@ -99,7 +99,7 @@ if($primary_email!=""){
     $user_email = $primary_email;
     
     file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","github, gith$user_id, $user_email");
-    setcookie("r_ression_id",$session_id);
+    setcookie("r_ression_id",$session_id,0,"/");
     header('Location: ' . "../index.html");
 }
 
