@@ -11,12 +11,15 @@ import (
 //	"strings" 
 //	"bytes"
 //	"io/ioutil"
+    "os"
 )
 
 const (
-	proxyAddr  = ":8080"
+	//proxyAddr  = ":8080"
 	apacheAddr = "http://localhost:8000" // Apache server address
 )
+
+var proxyAddr string
 
 
 var unLimiter *RateLimiter;
@@ -41,6 +44,9 @@ var loginLimiter *RateLimiter;     // Limit for google and login
 var code498Limiter  *RateLimiter;  //returns code 498
 
 func main() {
+
+
+
 	// Parse the URL of the Apache server
 	//                                reqminute|reqhour|reqday|paralconn|   bytesmin| byteshour|  bytesday
     unLimiter =        NewRateLimiter(-1,    -1,     -1,    -1,       -1,         -1,        -1,        -1)
@@ -84,6 +90,8 @@ func main() {
 		originalTransport: http.DefaultTransport,
 	}
 
+
+    proxyAddr = ":"+os.Args[1]
 	// Start the proxy server
 	fmt.Printf("Starting proxy server on %s\n", proxyAddr)
 	log.Fatal(http.ListenAndServe(proxyAddr, proxy))

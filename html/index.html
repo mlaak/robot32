@@ -81,12 +81,13 @@ id="chat-input-area">
   <select
     class="p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white text-lg w-full md:w-auto"
     id="model-select">
-    <option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>
+    <!--<option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>-->
+    <option value="experts/general?model=mistralai/mixtral-8x7b-instruct">R32-M</option>
     <option value="experts/general?model=mistralai/mixtral-8x22b-instruct">R32-L</option>
-    <option value="experts/general?model=openai/gpt-4o-2024-05-13">GPT-4o</option>
-    <option value="experts/general?model=google/gemini-flash-1.5">Gemini-F</option>
-    <option value="experts/general?model=perplexity/llama-3-sonar-large-32k-online">Perplexity</option>
-    <option value="experts/general?model=anthropic/claude-3.5-sonnet">Claude-3.5</option>    
+    <option value="experts/remote_llms?model=openai/gpt-4o-2024-05-13">$ GPT-4o</option>
+    <option value="experts/remote_llms?model=google/gemini-flash-1.5">$ Gemini-F</option>
+    <option value="experts/remote_llms?model=perplexity/llama-3-sonar-large-32k-online">$ Perplexity</option>
+    <option value="experts/remote_llms?model=anthropic/claude-3.5-sonnet">$ Claude-3.5</option>    
   </select>
   
   <button style="margin-top:7px"
@@ -317,10 +318,17 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         
         
         
-        fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
-          .then(response => response.json())
+        //fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
+        fetch('experts/illustrator?content='+encodeURIComponent(message))
+          .then(response => {
+            var imgdata = response.headers.get("Return-Image");
+            document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;
+            return response.json();
+          })
           .then(data => {
-            document.getElementById("gpt-image-"+reqno).src = data.image;
+//            document.getElementById("gpt-image-"+reqno).src = data.image;
+            document.getElementById("gpt-image-"+reqno).src_link = data.image;
+            
             console.log(data);
             
             const newHtml = picture_modal.split("!!REQNO!!").join(interaction_no+"").split("!!IMGSRC!!").join(data.image);

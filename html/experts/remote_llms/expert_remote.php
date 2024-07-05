@@ -31,13 +31,6 @@ $options = [
 $content = $_REQUEST["content"];
 $model = $_REQUEST["model"];
 
-
-
-if(!in_array($model, ['mistralai/mixtral-8x7b-instruct',"mistralai/mixtral-8x22b-instruct"])){
-    echo "Model not supported!";    
-}
-
-
 $r = $ai->chat($content,$model,$options,function($txt,$data){
     if(!headers_sent())header("openrouter-id: ".$data['id']);
     echo $txt;

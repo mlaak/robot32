@@ -197,10 +197,17 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         
         
         
-        fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
-          .then(response => response.json())
+        //fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
+        fetch('experts/illustrator?content='+encodeURIComponent(message))
+          .then(response => {
+            var imgdata = response.headers.get("Return-Image");
+            document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;
+            return response.json();
+          })
           .then(data => {
-            document.getElementById("gpt-image-"+reqno).src = data.image;
+//            document.getElementById("gpt-image-"+reqno).src = data.image;
+            document.getElementById("gpt-image-"+reqno).src_link = data.image;
+            
             console.log(data);
             
             const newHtml = picture_modal.split("!!REQNO!!").join(interaction_no+"").split("!!IMGSRC!!").join(data.image);
