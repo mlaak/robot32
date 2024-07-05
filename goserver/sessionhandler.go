@@ -24,11 +24,11 @@ func IsHex(s string) bool {
 
 func getCookieValue(r *http.Request, cookieName string) string {
 
-    cookies := r.Cookies()
+    /*cookies := r.Cookies()
     for _, cookie := range cookies {
         fmt.Println("Cookie name:", cookie.Name)
         fmt.Println("Cookie value:", cookie.Value)
-    }
+    }*/
 
 
 	cookie, err := r.Cookie(cookieName)
@@ -37,6 +37,13 @@ func getCookieValue(r *http.Request, cookieName string) string {
 	}
 	return cookie.Value
 }
+
+const (
+    UserTypeUnverified = "unverified_ip"
+    UserTypeCaptchad = "captchad_ip"
+    UserTypeGithub = "github"
+    UserTypeGoogle = "google"   
+)
 
 func GetUser(req *http.Request)(string,string){
     ip := strings.Split(req.RemoteAddr, ":")[0]
@@ -48,7 +55,7 @@ func GetUser(req *http.Request)(string,string){
     }
     
     if c == ""{
-        return "unverified_ip",ip
+        return UserTypeUnverified,ip
     }
     
     workingDir, err := os.Getwd()
@@ -72,22 +79,22 @@ func GetUser(req *http.Request)(string,string){
 	    
 	    if utype == "ip"{
 	        if uid != "ipus"+ip {
-	            return "unverified_ip",ip
+	            return UserTypeUnverified,ip
 	        } else {
-	            return "captchad_ip",uid
+	            return UserTypeCaptchad,uid
 	        }
 	    } else if utype == "github"{
-	        return "github", uid
+	        return UserTypeGithub, uid
 	    } else if utype == "google"{
-	        return "google", uid
+	        return UserTypeGoogle, uid
 	    } else {
-	        return "unverified_ip",ip
+	        return UserTypeUnverified,ip
 	    }
 	    //fmt.Println("!!!!!!!!!",fileContents)
 	    //return "1","1"
 		
 	} else {
-	    return "unverified_ip",ip
+	    return UserTypeUnverified,ip
 	}
        
 }

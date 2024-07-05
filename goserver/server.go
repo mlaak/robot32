@@ -43,26 +43,26 @@ var code498Limiter  *RateLimiter;  //returns code 498
 func main() {
 	// Parse the URL of the Apache server
 	//                                reqminute|reqhour|reqday|paralconn|   bytesmin| byteshour|  bytesday
-    unLimiter =        NewRateLimiter(       -1,     -1,    -1,       -1,         -1,        -1,        -1)
-	stopLimiter =      NewRateLimiter(        0,      0,     0,        0,          0,         0,         0)
+    unLimiter =        NewRateLimiter(-1,    -1,     -1,    -1,       -1,         -1,        -1,        -1)
+	stopLimiter =      NewRateLimiter(0,      0,      0,     0,        0,          0,         0,         0)
 	
-	code498Limiter =   NewRateLimiter(        0,      0,     0,        0,          0,         0,         0)
+	code498Limiter =   NewRateLimiter(1,      0,      0,     0,        0,          0,         0,         0)
 	code498Limiter.responseCode = 498; //expired or otherwise invalid token
 	
-	expertIPLimiter =  NewRateLimiter(       60,    300,  3000,       10,        500,    500000,   5000000)
-	expertAIPLimiter = NewRateLimiter(     6000,  60000,600000,      500,    5000000,  50000000, 500000000)
+	expertIPLimiter =  NewRateLimiter(2,     60,    300,  3000,       10,        500,    500000,   5000000)
+	expertAIPLimiter = NewRateLimiter(3,   6000,  60000,600000,      500,    5000000,  50000000, 500000000)
 	
-	expertUSRLimiter = NewRateLimiter(       60,    300,  3000,       10,        500,    500000,   5000000)
-	expertPAYLimiter = NewRateLimiter(       60,    300,  3000,       10,        500,    500000,   5000000)
-	expertKEYLimiter = NewRateLimiter(       60,    300,  3000,       10,        500,    500000,   5000000)
+	expertUSRLimiter = NewRateLimiter(4,     60,    300,  3000,       10,        500,    500000,   5000000)
+	expertPAYLimiter = NewRateLimiter(5,     60,    300,  3000,       10,        500,    500000,   5000000)
+	expertKEYLimiter = NewRateLimiter(6,     60,    300,  3000,       10,        500,    500000,   5000000)
 
-    staticIPLimiter =  NewRateLimiter(     6000,  60000,600000,     1000,         -1,        -1,        -1)
+    staticIPLimiter =  NewRateLimiter(7,   6000,  60000,600000,     1000,         -1,        -1,        -1)
 
-    imageIPLimiter =   NewRateLimiter(     6000,  60000,600000,     1000,         -1,        -1,        -1)
-    imageUSRLimiter =  NewRateLimiter(     6000,  60000,600000,     1000,         -1,        -1,        -1)
-    imagePAYLimiter =  NewRateLimiter(     6000,  60000,600000,     1000,         -1,        -1,        -1)
+    imageIPLimiter =   NewRateLimiter(8,   6000,  60000,600000,     1000,         -1,        -1,        -1)
+    imageUSRLimiter =  NewRateLimiter(9,   6000,  60000,600000,     1000,         -1,        -1,        -1)
+    imagePAYLimiter =  NewRateLimiter(10,  6000,  60000,600000,     1000,         -1,        -1,        -1)
       
-	loginLimiter =     NewRateLimiter(     6000,  60000,600000,     1000,         -1,        -1,        -1)
+	loginLimiter =     NewRateLimiter(11,  6000,  60000,600000,     1000,         -1,        -1,        -1)
 	
 	apacheURL, err := url.Parse(apacheAddr)
 	if err != nil {

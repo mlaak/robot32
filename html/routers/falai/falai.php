@@ -21,6 +21,9 @@ $result = curl_exec($ch);
 curl_close($ch);
 
 $json = json_decode($result ,true);
+
+//header("Return-Image:".explode(',',$json['images'][0]['url'],2)[1]);
+
 $dat = base64_decode(explode(',',$json['images'][0]['url'],2)[1]);
 $md5 = md5($dat);
 $time = microtime(true);

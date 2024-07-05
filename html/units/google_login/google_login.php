@@ -73,10 +73,10 @@ if (isset($_GET['code'])) {
         if (isset($user_data['email'])) {
             
             $session_id = generateRandomString(32);
-            $user_id = $user_data['sub'];
+            $user_id = (($user_data['sub'])*1)."";
             $user_email = $user_data['email'];
-            
-            file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","google, goog$user_id, $user_email");
+            header('Create-Session: ' . base64_encode("$session_id, google, goog$user_id, $user_email"));
+            @file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","google, goog$user_id, $user_email");
             setcookie("r_ression_id",$session_id,0,"/");
             header('Location: ' . "index.html");
         } else {

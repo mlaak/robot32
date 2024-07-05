@@ -15,7 +15,8 @@ import (
 //	"net/http/httputil"
 //	"net/url"
 //	"errors"
-	"strings" 
+//
+//	"strings" 
 	"bytes"
 	"io/ioutil"
 )
@@ -51,17 +52,25 @@ type ObservableReadCloser struct {
 */
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
-    ip := strings.Split(req.RemoteAddr, ":")[0]
+    usertype, iporid := GetUser(req) 
     
-    orc := &ObservableReadCloser{ip:ip}
+    //ip := strings.Split(req.RemoteAddr, ":")[0]
+    
+    orc := &ObservableReadCloser{ip:iporid}
     orc.request = req.URL.String()
     
     // **********  Select rate limiters based on url and user
-    rateLimiter,coLimiter := RateLimitersSelect(req)
     
+    rateLimiter,coLimiter := PathUserRateLimitersSelect(req.URL.Path,usertype)
+    fmt.Println("")
+    fmt.Println("Path",       req.URL.Path)
+    fmt.Println("Usertype",   usertype)
+    fmt.Println("iporid",     iporid)    
+    fmt.Println("Limiter nr", rateLimiter.nr)
+       
        
     // **********   Aplly ratelimiter ********************************
-    if allowed, ecode, ertext := rateLimiter.Allow(ip,orc);!allowed {       		
+    if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc);!allowed {       		
 			orc.ReleaseAll()
 			return MakeHttpErrorResponse(ecode,ertext)
     }
@@ -83,9 +92,9 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 	_, meterBytes := resp.Header["Meter-Bytes"];
 	if meterBytes {
 	    //fmt.Println("Metering bytes")
-	    rateLimiter.Addbytes(ip,req.ContentLength) //can this be tricked by the user?
+	    rateLimiter.Addbytes(iporid,req.ContentLength) //can this be tricked by the user?
 	    meterfunc := func(data []byte, n int64){
-	       rateLimiter.Addbytes(ip,n)
+	       rateLimiter.Addbytes(iporid,n)
 	    }
 	    orc.AddStreamObserver(meterfunc)
 	}

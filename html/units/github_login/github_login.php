@@ -95,10 +95,11 @@ foreach ($email_data as $email) {
 
 if($primary_email!=""){
     $session_id = generateRandomString(32);
-    $user_id = $user_data['id'];
+    $user_id = ($user_data['id']*1)."";
     $user_email = $primary_email;
     
-    file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","github, gith$user_id, $user_email");
+    header('Create-Session: ' . base64_encode("$session_id, github, gith$user_id, $user_email"));
+    @file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","github, gith$user_id, $user_email");
     setcookie("r_ression_id",$session_id,0,"/");
     header('Location: ' . "../index.html");
 }
