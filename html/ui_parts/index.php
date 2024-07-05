@@ -198,7 +198,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         
         
         //fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
-        fetch('experts/illustrator?content='+encodeURIComponent(message))
+        fetch('experts/illustrator?content='+encodeURIComponent(message),{credentials: "same-origin"})
           .then(response => {
             var imgdata = response.headers.get("Return-Image");
             document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;
@@ -236,8 +236,11 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         fetch(llm_url+'&content='+encodeURIComponent(message),{credentials: "same-origin"})
         //fetch('tes.php?content='+message)
           .then(response => {
+          //console.log(response)
             if (!response.ok) {
-            
+                if(response.status==498){
+                    window.location.href="login.html";
+                }    
                 console.log(response)
                  //const decoder = new TextDecoder();
                 let elem = document.getElementById("gpt-text-"+reqno);
@@ -319,7 +322,20 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     make_modal(0);
 
     
-
+    function checkCookie(name) {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    if(!checkCookie('r_ression_id')){
+        window.location.href="login.html";
+    }
 
 
     // Speech-to-text

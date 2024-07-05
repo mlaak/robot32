@@ -31,7 +31,7 @@ func PathUserRateLimitersSelect(path string, usertype string) (*RateLimiter,*Rat
     
     if strings.HasPrefix(p,"/experts/") {
         if usertype == UserTypeUnverified {
-            return stopLimiter, stopLimiter
+            return code498Limiter, code498Limiter
         }
         if usertype == UserTypeCaptchad {
             return expertIPLimiter, expertAIPLimiter    

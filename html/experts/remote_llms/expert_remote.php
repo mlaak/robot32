@@ -8,9 +8,22 @@ header('Meter-Bytes:true');
 
 require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
 
+if(!isset($_COOKIE['r_user_key'])){
+    echo "You need to connect your Openrouter account (go to SETTINGS). \n\nIt is an more expensive model (well relativly, its still cents or franction of cents but we cannot do it for free). This way you are paying these cents - not us :). ";
+    exit();
+}
+
+//$OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));       
+
+$OPENROUTER_API_KEY = $_COOKIE['r_user_key'];
+
+if(!ctype_alnum(str_replace("-","",$OPENROUTER_API_KEY))){
+    echo "Provided key is not consisting of alphanumeric characters and '-'. ";
+    exit();
+}
 
 
-$OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));       
+
 $headers = [
     "Authorization: Bearer $OPENROUTER_API_KEY",
     "Content-Type: application/json"
