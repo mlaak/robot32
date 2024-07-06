@@ -46,9 +46,18 @@ $model = $_REQUEST["model"];
 
 $r = $ai->chat($content,$model,$options,function($txt,$data){
     if(!headers_sent())header("openrouter-id: ".$data['id']);
+    
+    //print_r($data);
+    
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
 }); 
+
+
+if($r['error_code']){
+    echo "Error ".$r['error_code']." ".$r['error'];
+}
+//print_r($r);
 //$r = $ai->chat($_REQUEST["content"],$_REQUEST["model"],$history);
 
 
