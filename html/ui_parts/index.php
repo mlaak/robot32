@@ -103,7 +103,11 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
   </div>
   
   
-
+<?php include __DIR__."/templates/template_message_interaction.htm";?>
+  
+<?php include __DIR__."/templates/template_picture_modal.htm";?>
+  
+ 
   <script>
     function toggleParameters() {
       const parametersList = document.getElementById('parameters-list');
@@ -118,12 +122,17 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
 
   <script src="beep.jsi"></script>
   <script>
-    let message_interaction = `
+  
+  
+    /*let message_interaction = `
     <div>
       <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg" id="user-message-!!REQNO!!">
         <p>!!USER-REQUEST!!</p>
       </div>
       <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message--!!REQNO!!"> 
+      
+    
+      
 <!--      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex items-start space-x-4 text-lg"
         id="gpt-message-!!REQNO!!">-->
         <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image"
@@ -132,11 +141,27 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         <pre style = "white-space: pre-wrap" text-zinc-800 dark:text-zinc-200 ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
         </pre>  
           
-        
+       
+      </div>   
+      
+      
+      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="reply-message-div-!!REQNO!!">
+      
+      
+      <textarea style="min-height: 45px; height: 45px;" id="reply-message-box-!!REQNO!!" placeholder="Type a reply..." class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-600 dark:text-white pr-12 text-lg resize-none overflow-hidden" run_button="run-button--!!REQNO!!"></textarea> 
+      
+      <button style="height: 45px; width: 80px"  class="p-2 bg-white dark:bg-zinc-800 text-zinc-400  dark:text-zinc-600 focus:text-white  border border-zinc-300 dark:border-zinc-600 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full" id="run-button--!!REQNO!!" onclick="run_message(document.getElementById('reply-message-box-!!REQNO!!').value);document.getElementById('reply-message-box-!!REQNO!!').value='';">RUN</button>
+      
+      
       </div>
+      
     </div>
   `;
   
+  */
+  
+  
+  /*
   let picture_modal = `
   <div id="modal-!!REQNO!!" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md space-y-4" id="modal-content-!!REQNO!!">
@@ -152,7 +177,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     </div>
   </div>
   `;
-  
+  */
   
   
   
@@ -174,6 +199,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     function add_interaction(message){
         interaction_no += 1;
         
+        var message_interaction = document.getElementById("template_message_interaction").innerHTML;
         const newHtml = message_interaction.replace("!!USER-REQUEST!!",textToHtml(message)).split("!!REQNO!!").join(interaction_no+"");
         let e = document.getElementById("chat-messages-area");
         //If I have a html code as a string, then I want to make it to html object and insert it after another existing object. How do I do it?
@@ -210,6 +236,7 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
             
             console.log(data);
             
+            var picture_modal = document.getElementById("template_picture_modal").innerHTML;
             const newHtml = picture_modal.split("!!REQNO!!").join(interaction_no+"").split("!!IMGSRC!!").join(data.image);
             
             let e = document.getElementById("modal-0");

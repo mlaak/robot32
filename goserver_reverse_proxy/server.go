@@ -91,7 +91,10 @@ func main() {
 	}
 
 
-    proxyAddr = ":"+os.Args[1]
+
+    proxyAddr = os.Args[1]
+    
+    //proxyAddr = ":"+os.Args[1]
 	// Start the proxy server
 	fmt.Printf("Starting proxy server on %s\n", proxyAddr)
 	log.Fatal(http.ListenAndServe(proxyAddr, proxy))
