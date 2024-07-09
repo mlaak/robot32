@@ -1,0 +1,23 @@
+<div class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
+    <div style="color:gray" class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Parameters</div>
+    <svg class="w-4 h-4 ml-1 transform transition duration-200" id="parameters-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+</div>
+<ul class="hidden space-y-2" id="parameters-list">
+    <li>Parameter 1</li>
+    <li>Parameter 2</li>
+    <li>Parameter 3</li>
+</ul>
+
+
+<script>
+    function toggleParameters() {
+      const parametersList = document.getElementById('parameters-list');
+      const arrow = document.getElementById('parameters-arrow');
+
+      parametersList.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180'); 
+    }
+</script>
+

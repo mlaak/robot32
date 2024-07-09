@@ -10,17 +10,16 @@
 </head>
 <body class="bg-zinc-100 dark:bg-zinc-900">
 
-  <div class="flex flex-col md:flex-row h-screen">
+<div id="screen" class="flex flex-col md:flex-row h-screen">
     
-    <div class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4" id="sidebar">
+    <div id="sidebar" class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4" >
       <div class="flex justify-between items-center md:block">
         <div class="text-lg font-semibold text-zinc-800 dark:text-zinc-200" id="sidebar-title">Menu</div>
         <button class="md:hidden p-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-zinc-200 rounded-md focus:outline-none"
           id="sidebar-toggle">
           ☰
         </button>
-      </div>
-      
+      </div>     
       <!--    <script src="https://cdn.tailwindcss.com/3.4.3"></script>
     <!-- dont remove this comment here -->
     <div class="">
@@ -39,10 +38,10 @@
             id="sidebar-logout-link">Logout</a></li>
       </ul>
      </div> 
-    </div>
+    </div> <!--sidebar-->
 
-    <div class="flex flex-col flex-1" id="main-content">
-      
+
+    <div id="main-content" class="flex flex-col flex-1" >  
       <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
 <!-- dont remove this comment here -->
 
@@ -165,111 +164,141 @@ document.addEventListener('keydown', function(event) {
     </script> 
   
 
-
       <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages-area">
-
-
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md text-lg" id="initial-message">
           <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today?</p>
         </div>
-
-
         <div> 
-          <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg " id="user-message">
-            <p>What is robot32-chat and what can I do with it.</p>
-          </div>
+  <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg " id="user-message">
+    <p>What is robot32-chat and what can I do with it.</p>
+  </div>
 
-          <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message">  
-            <img src="/welcome2.jpg" width="200" height="200" alt="generated image"
-              class="rounded-md shadow-md cursor-pointer" id="gpt-image-0" />
-              <pre style = "white-space: pre-wrap" ><p class="text-zinc-800 dark:text-zinc-200">Robot32-chat is large language model based on open source LLM. 
+  <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message">  
+    <img src="/welcome2.jpg" width="200" height="200" alt="generated image"
+      class="rounded-md shadow-md cursor-pointer" id="gpt-image-0" />
+      <pre style = "white-space: pre-wrap" ><p class="text-zinc-800 dark:text-zinc-200">Robot32-chat is large language model based on open source LLM. 
 Type in your question (or picture idea) and hit the RUN button.
 You can try:
-  What is the capital of Sweden?
-  What is the smallest whale?
-  Make me pythonc function that sorts custom objects be given param.
-  A serene forest landscape at sunset, glassy lake reflecting the sky.
-  A surreal, dreamlike landscape with floating islands.
-          
+What is the capital of Sweden?
+What is the smallest whale?
+Make me pythonc function that sorts custom objects be given param.
+A serene forest landscape at sunset, glassy lake reflecting the sky.
+A surreal, dreamlike landscape with floating islands.
+  
 Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
-            </pre>
-            </p>
-          </div>
-        
-          
-          
-          
-        </div>
-        
-        
-        
-      </div>
-    </div>
+    </pre>
+    </p>
+  </div>  
+</div>
+      </div>  <!--chat-messages-area-->
+      
+    </div> <!--main-content-->
+    
+    
+    <div id="parameters-section" class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4">
+        <div class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
+    <div style="color:gray" class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Parameters</div>
+    <svg class="w-4 h-4 ml-1 transform transition duration-200" id="parameters-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+    </svg>
+</div>
+<ul class="hidden space-y-2" id="parameters-list">
+    <li>Parameter 1</li>
+    <li>Parameter 2</li>
+    <li>Parameter 3</li>
+</ul>
 
-    <div class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4" id="parameters-section">
-      <div class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
-        <div style="color:gray" class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Parameters</div>
-        <svg class="w-4 h-4 ml-1 transform transition duration-200" id="parameters-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-      </div>
-      <ul class="hidden space-y-2" id="parameters-list">
-        <li>Parameter 1</li>
-        <li>Parameter 2</li>
-        <li>Parameter 3</li>
-      </ul>
-    </div>
-  </div>
 
-  <div id="modal-0" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+<script>
+    function toggleParameters() {
+      const parametersList = document.getElementById('parameters-list');
+      const arrow = document.getElementById('parameters-arrow');
+
+      parametersList.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180'); 
+    }
+</script>
+
+  
+    </div>
+        
+</div>  <!--screen-->
+
+
+<div id="modal-0" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
     <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md space-y-4" id="modal-content-0">
       <img src="welcome2.jpg" alt="generated image" class="w-full h-auto" id="modal-image-0" />
-      <div class="flex space-x-4" id="modal-buttons-0">
-        <button
-          class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          id="download-btn">Download</button>
-        <button
-          class="p-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          id="animate-btn">Animate</button>
-      </div>
-    </div>
-  </div>
-  
-  
-<div id="template_message_interaction" style="display:hidden">
-    <div>
-      <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg" id="user-message-!!REQNO!!">
-        <p>!!USER-REQUEST!!</p>
-      </div>
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message--!!REQNO!!"> 
-      
-    
-      
-<!--      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex items-start space-x-4 text-lg"
-        id="gpt-message-!!REQNO!!">-->
-        <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image"
-          class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
-        
-        <pre style = "white-space: pre-wrap" text-zinc-800 dark:text-zinc-200 ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
-        </pre>  
-          
-       
-      </div>   
-      
-      
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="reply-message-div-!!REQNO!!">
-      
-      
-      <textarea style="min-height: 45px; height: 45px;" id="reply-message-box-!!REQNO!!" placeholder="Type a reply..." class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-600 dark:text-white pr-12 text-lg resize-none overflow-hidden" run_button="run-button--!!REQNO!!"></textarea> 
-      
-      <button style="height: 45px; width: 80px"  class="p-2 bg-white dark:bg-zinc-800 text-zinc-400  dark:text-zinc-600 focus:text-white  border border-zinc-300 dark:border-zinc-600 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full" id="run-button--!!REQNO!!" onclick="run_message(document.getElementById('reply-message-box-!!REQNO!!').value);document.getElementById('reply-message-box-!!REQNO!!').value='';">RUN</button>
-      
-      
-      </div>
-      
+          <div class="flex space-x-4" id="modal-buttons-0">
+            <button
+              class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              id="download-btn">Download</button>
+            <button
+              class="p-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+              id="animate-btn">Animate</button>
+          </div>
     </div>
 </div>
   
+<div id="templates" style="display:none">     
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="template_reply_to_message" style="display:hidden">
+
+<div id="reply-to-message-div-!!REQNO!!" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" >
+  
+    <textarea style="min-height: 45px; height: 45px;" id="reply-to-message-box-!!REQNO!!" placeholder="Type a reply..." class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-600 dark:text-white pr-12 text-lg resize-none overflow-hidden" run_button="run-button--!!REQNO!!"></textarea> 
+  
+    <button style="height: 45px; width: 80px"  class="p-2 bg-white dark:bg-zinc-800 text-zinc-400  dark:text-zinc-600 focus:text-white  border border-zinc-300 dark:border-zinc-600 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full" id="run-button--!!REQNO!!" onclick="run_message_continue(this.parentElement.parentElement,this.parentElement,document.getElementById('reply-to-message-box-!!REQNO!!').value);document.getElementById('reply-to-message-box-!!REQNO!!').value='';">RUN</button>
+  
+</div> <!--reply-to-message-div-!!REQNO!!-->
+
+</div>
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="template_message_interaction" style="display:hidden">
+
+
+<div id="interaction-!!REQNO!!">
+  <div id="user-message-!!REQNO!!" class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg">
+    <p>!!USER-REQUEST!!</p>
+  </div>
+  
+  
+  <div id="gpt-message--!!REQNO!!" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" > 
+    <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image" class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
+    <pre style = "white-space: pre-wrap" ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
+    </pre>  
+  </div> <!--gpt-message--!!REQNO!!-->
+</div>
+
+
+
+      
+</div>
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="template_message_continue" style="display:hidden">
+
+
+<div id="interaction-cont-!!REQNO!!">
+  <div id="user-message-cont-!!REQNO!!" class="bg-teal-500 text-white p-4 rounded-lg shadow-md self-end text-lg">
+    <p>!!USER-REQUEST!!</p>
+  </div>
+  
+  
+  <div id="gpt-message-cont-!!REQNO!!" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" > 
+    <pre style = "white-space: pre-wrap" ><p id="gpt-text-cont-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
+    </pre>  
+  </div> <!--gpt-message--!!REQNO!!-->
+</div>
+      
+</div>
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
 <div id="template_picture_modal" style="display:hidden">
     <div id="modal-!!REQNO!!" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md space-y-4" id="modal-content-!!REQNO!!">
@@ -285,113 +314,198 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         </div>
     </div>
 </div>
-  
+</div>  
  
-  <script>
-    function toggleParameters() {
-      const parametersList = document.getElementById('parameters-list');
-      const arrow = document.getElementById('parameters-arrow');
-
-      parametersList.classList.toggle('hidden');
-      arrow.classList.toggle('rotate-180'); 
-    }
-  </script>
+  
 
 
-
-  <script src="beep.jsi"></script>
-  <script>
-  
-  
-    /*let message_interaction = `
-    <div>
-      <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg" id="user-message-!!REQNO!!">
-        <p>!!USER-REQUEST!!</p>
-      </div>
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message--!!REQNO!!"> 
-      
-    
-      
-<!--      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex items-start space-x-4 text-lg"
-        id="gpt-message-!!REQNO!!">-->
-        <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image"
-          class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
-        
-        <pre style = "white-space: pre-wrap" text-zinc-800 dark:text-zinc-200 ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
-        </pre>  
-          
-       
-      </div>   
-      
-      
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="reply-message-div-!!REQNO!!">
-      
-      
-      <textarea style="min-height: 45px; height: 45px;" id="reply-message-box-!!REQNO!!" placeholder="Type a reply..." class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-600 dark:text-white pr-12 text-lg resize-none overflow-hidden" run_button="run-button--!!REQNO!!"></textarea> 
-      
-      <button style="height: 45px; width: 80px"  class="p-2 bg-white dark:bg-zinc-800 text-zinc-400  dark:text-zinc-600 focus:text-white  border border-zinc-300 dark:border-zinc-600 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full" id="run-button--!!REQNO!!" onclick="run_message(document.getElementById('reply-message-box-!!REQNO!!').value);document.getElementById('reply-message-box-!!REQNO!!').value='';">RUN</button>
-      
-      
-      </div>
-      
-    </div>
-  `;
-  
-  */
-  
-  
-  /*
-  let picture_modal = `
-  <div id="modal-!!REQNO!!" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-    <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md space-y-4" id="modal-content-!!REQNO!!">
-      <img src="!!IMGSRC!!" alt="generated image" class="w-full h-auto" id="modal-image-!!REQNO!!" />
-      <div class="flex space-x-4" id="modal-buttons-!!REQNO!!">
-        <button
-          class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          id="download-btn">Download</button>
-        <button
-          class="p-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-          id="animate-btn">Animate</button>
-      </div>
-    </div>
-  </div>
-  `;
-  */
-  
-  
-  
-    let interaction_no = 0;
-    
+<script src="beep.jsi"></script>
+<script>
     function textToHtml(text) {
-      const entities = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&apos;'
-      };
+  const entities = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&apos;'
+  };
 
-      return text.replace(/[&<>"']/g, (match) => entities[match]);
+  return text.replace(/[&<>"']/g, (match) => entities[match]);
+}
+
+
+function checkCookieExists(name) {
+  const cookies = document.cookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i].trim();
+    if (cookie.startsWith(name + '=')) {
+      return true;
+    }
+  }
+  return false;
+}
+
+    if(!checkCookieExists('r_ression_id')){
+        window.location.href="login.html";
     }
 
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+          document.getElementById('sidebar-menu').classList.toggle('hidden');
+    });
+
+    function template(name,...replaces){ 
+    var s = document.getElementById(name).innerHTML;
     
-    function add_interaction(message){
-        interaction_no += 1;
-        
-        var message_interaction = document.getElementById("template_message_interaction").innerHTML;
-        const newHtml = message_interaction.replace("!!USER-REQUEST!!",textToHtml(message)).split("!!REQNO!!").join(interaction_no+"");
-        let e = document.getElementById("chat-messages-area");
-        //If I have a html code as a string, then I want to make it to html object and insert it after another existing object. How do I do it?
-        const newDiv = document.createElement("div");
-        newDiv.innerHTML = newHtml;
-        e.insertBefore(newDiv, e.firstChild);
-        //e.after(newDiv);
-        return interaction_no;
+    
+    console.log(replaces);
+    
+    if(replaces){
+        replaces.forEach(function(r) {
+            s = s.split(r[0]).join(r[1]);
+        });
+    }
+    var newDiv = document.createElement("div");
+    newDiv.innerHTML = s;
+    return newDiv;
+}
+
+
+
+
+let interaction_no = 0;
+
+
+function add_interaction_continue(el,el2,message){
+    interaction_no += 1;
+    
+    
+    el.removeChild(el2);
+    
+     let message_interaction = template("template_message_continue",
+                                ["!!USER-REQUEST!!",textToHtml(message)],
+                                ["!!REQNO!!",interaction_no+""]); 
+                                
+     el.appendChild(message_interaction);      
+     add_reply_to(el);
+     return interaction_no;               
+    
+}
+
+
+function add_reply_to(el){
+    let reply_to = template("template_reply_to_message", ["!!REQNO!!",interaction_no+""]);
+    el.appendChild(reply_to);
+}
+
+
+
+
+function add_interaction(message){
+    interaction_no += 1;
+    
+    let cma = document.getElementById("chat-messages-area");
+    
+    
+    let message_interaction = template("template_message_interaction",
+                                ["!!USER-REQUEST!!",textToHtml(message)],
+                                ["!!REQNO!!",interaction_no+""]); 
+    cma.insertBefore(message_interaction, cma.firstChild);
+    
+    
+    add_reply_to(cma.firstChild);
+    //cma.firstChild.appendChild(reply_to);
+    
+    return interaction_no;
+    
+    /*var message_interaction = document.getElementById("template_message_interaction").innerHTML;
+    const newHtml = message_interaction.replace("!!USER-REQUEST!!",textToHtml(message)).split("!!REQNO!!").join(interaction_no+"");
+    let e = document.getElementById("chat-messages-area");
+    //If I have a html code as a string, then I want to make it to html object and insert it after another existing object. How do I do it?
+    var newDiv = document.createElement("div");
+    newDiv.innerHTML = newHtml;
+    
+    e.insertBefore(newDiv, e.firstChild);
+    
+    
+    var replyto = document.getElementById("template_reply_to_message").innerHTML;
+    const newReplyTo = replyto.split("!!REQNO!!").join(interaction_no+"");
+    var newReplyToDiv = document.createElement("div");
+    newReplyToDiv.innerHTML = newReplyTo;
+    e.firstChild.appendChild(newReplyToDiv);
+    
+    //e.after(newDiv);
+    return interaction_no;*/
+}
+
+
+
+ 
+      
+  
+  
+    function run_llm_query(llm_url,message,gpt_text_elem){
+        fetch(llm_url+'&content='+encodeURIComponent(message),{credentials: "same-origin"})
+        //fetch('tes.php?content='+message)
+          .then(response => {
+          //console.log(response)
+            if (!response.ok) {
+                if(response.status==498){
+                    window.location.href="login.html";
+                }    
+                console.log(response)
+                 //const decoder = new TextDecoder();
+                //let elem = document.getElementById("gpt-text-"+reqno);
+                 const headerString = Array.from(response.headers.entries())
+                  .map(([key, value]) => `${key}: ${value}`)
+                  .join('\n');
+                  
+      
+                gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(headerString+"");
+                
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.body;
+          })
+          .then(stream => {
+            const reader = stream.getReader();
+            const decoder = new TextDecoder();
+
+            // Read the stream in chunks
+            function read() {
+              return reader.read().then(({ done, value }) => {
+                if (done) {
+                  console.log('Stream reading complete');
+                  return;
+                }
+
+                // Decode the chunk to a string and log it
+                //let elem = document.getElementById("gpt-text-"+reqno);
+                gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
+                
+                console.log(decoder.decode(value));
+
+                // Read the next chunk
+                return read();
+              });
+            }
+
+            // Start reading the stream
+            return read();
+          })
+          .catch(err => console.error(err));        
     }
   
-  
-  
-  
+    function run_message_continue(el,el2,message){
+        //let reqno = add_interaction(message);
+        let reqno = add_interaction_continue(el,el2,message);
+        
+        let llm_url = document.getElementById("model-select").value;
+        gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
+        
+        run_llm_query(llm_url,message,gpt_text_elem);
+        
+    }
+    
     function run_message(message){
         let reqno = add_interaction(message);
         
@@ -425,126 +539,53 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
             
             
             make_modal(reqno);
-            //modal
-            
-            
-            
-            
+            //modal  
           })
           .catch(error => {
             console.error('Error:', error);
           });
         
         let llm_url = document.getElementById("model-select").value;
-        //fetch('groq.php?content='+message)
+        gpt_text_elem = document.getElementById("gpt-text-"+reqno);
+        
+        run_llm_query(llm_url,message,gpt_text_elem);
         
         
-        fetch(llm_url+'&content='+encodeURIComponent(message),{credentials: "same-origin"})
-        //fetch('tes.php?content='+message)
-          .then(response => {
-          //console.log(response)
-            if (!response.ok) {
-                if(response.status==498){
-                    window.location.href="login.html";
-                }    
-                console.log(response)
-                 //const decoder = new TextDecoder();
-                let elem = document.getElementById("gpt-text-"+reqno);
-                 const headerString = Array.from(response.headers.entries())
-                  .map(([key, value]) => `${key}: ${value}`)
-                  .join('\n');
-                  
-      
-                elem.innerHTML = elem.innerHTML+textToHtml(headerString+"");
-                
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.body;
-          })
-          .then(stream => {
-            const reader = stream.getReader();
-            const decoder = new TextDecoder();
-
-            // Read the stream in chunks
-            function read() {
-              return reader.read().then(({ done, value }) => {
-                if (done) {
-                  console.log('Stream reading complete');
-                  return;
-                }
-
-                // Decode the chunk to a string and log it
-                let elem = document.getElementById("gpt-text-"+reqno);
-                elem.innerHTML = elem.innerHTML+textToHtml(decoder.decode(value));
-                
-                console.log(decoder.decode(value));
-
-                // Read the next chunk
-                return read();
-              });
-            }
-
-            // Start reading the stream
-            return read();
-          })
-          .catch(err => console.error(err));
     }
-    
-      document.getElementById('sidebar-toggle').addEventListener('click', () => {
-          document.getElementById('sidebar-menu').classList.toggle('hidden');
-        });
-    
-    
+ 
     function make_modal(reqno){
-   
-      
 
-        document.getElementById('gpt-image-'+reqno).addEventListener('click', () => {
-            console.log("clicked");
-          document.getElementById('modal-'+reqno).classList.remove('hidden');
-        });
+  
 
-        document.getElementById('download-btn').addEventListener('click', () => {
-          const link = document.createElement('a');
-          link.href = document.getElementById('modal-image-'+reqno).src;
-          link.download = 'generated image';
-          link.click();
-        });
+    document.getElementById('gpt-image-'+reqno).addEventListener('click', () => {
+        console.log("clicked");
+      document.getElementById('modal-'+reqno).classList.remove('hidden');
+    });
 
-        document.getElementById('animate-btn').addEventListener('click', () => {
-          const image = document.getElementById('modal-image-'+reqno);
-          image.classList.add('animate-bounce');
-          setTimeout(() => image.classList.remove('animate-bounce'), 1000);
-        });
+    document.getElementById('download-btn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.href = document.getElementById('modal-image-'+reqno).src;
+      link.download = 'generated image';
+      link.click();
+    });
 
-        document.getElementById('modal-'+reqno).addEventListener('click', (e) => {
-          if (e.target === document.getElementById('modal-'+reqno)) {
-            document.getElementById('modal-'+reqno).classList.add('hidden');
-          }
-        });
-    
-    
-    }
-    make_modal(0);
+    document.getElementById('animate-btn').addEventListener('click', () => {
+      const image = document.getElementById('modal-image-'+reqno);
+      image.classList.add('animate-bounce');
+      setTimeout(() => image.classList.remove('animate-bounce'), 1000);
+    });
 
-    
-    function checkCookie(name) {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + '=')) {
-          return true;
-        }
+    document.getElementById('modal-'+reqno).addEventListener('click', (e) => {
+      if (e.target === document.getElementById('modal-'+reqno)) {
+        document.getElementById('modal-'+reqno).classList.add('hidden');
       }
-      return false;
-    }
-    
-    if(!checkCookie('r_ression_id')){
-        window.location.href="login.html";
-    }
+    });
 
 
-    // Speech-to-text
+}
+make_modal(0);
+  
+     // Speech-to-text
     const microphoneBtn = document.getElementById('microphone-btn');
 
     window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -602,6 +643,10 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
       document.getElementById('message-box').value="";
       //recognition = new SpeechRecognition();
     };
-  </script>
+</script>
+
+
+
+
 </body>
 </html>

@@ -1,33 +1,23 @@
+<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
 <div id="template_message_interaction" style="display:hidden">
-    <div>
-      <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg" id="user-message-!!REQNO!!">
-        <p>!!USER-REQUEST!!</p>
-      </div>
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="gpt-message--!!REQNO!!"> 
+
+
+<div id="interaction-!!REQNO!!">
+  <div id="user-message-!!REQNO!!" class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg">
+    <p>!!USER-REQUEST!!</p>
+  </div>
+  
+  
+  <div id="gpt-message--!!REQNO!!" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" > 
+    <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image" class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
+    <pre style = "white-space: pre-wrap" ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
+    </pre>  
+  </div> <!--gpt-message--!!REQNO!!-->
+</div>
+
+
+
       
-    
-      
-<!--      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex items-start space-x-4 text-lg"
-        id="gpt-message-!!REQNO!!">-->
-        <img src="https://placehold.co/200x200" width="200" height="200" alt="generated image"
-          class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
-        
-        <pre style = "white-space: pre-wrap" text-zinc-800 dark:text-zinc-200 ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200"></p>
-        </pre>  
-          
-       
-      </div>   
-      
-      
-      <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" id="reply-message-div-!!REQNO!!">
-      
-      
-      <textarea style="min-height: 45px; height: 45px;" id="reply-message-box-!!REQNO!!" placeholder="Type a reply..." class="w-full p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-800 dark:border-zinc-600 dark:placeholder-zinc-600 dark:text-white pr-12 text-lg resize-none overflow-hidden" run_button="run-button--!!REQNO!!"></textarea> 
-      
-      <button style="height: 45px; width: 80px"  class="p-2 bg-white dark:bg-zinc-800 text-zinc-400  dark:text-zinc-600 focus:text-white  border border-zinc-300 dark:border-zinc-600 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full" id="run-button--!!REQNO!!" onclick="run_message(document.getElementById('reply-message-box-!!REQNO!!').value);document.getElementById('reply-message-box-!!REQNO!!').value='';">RUN</button>
-      
-      
-      </div>
-      
-    </div>
 </div>
