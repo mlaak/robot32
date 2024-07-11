@@ -1,8 +1,27 @@
+
+function get_chat_history(element,out = []){
+  for (let i = 0; i < element.children.length; i++) {
+    const child = element.children[i];
+    console.log("child is",child,child.tagName);
+    if(child.getAttribute('role') == "user" || child.getAttribute('role') == "ai"){
+      out.push(child.getAttribute('role')+":"+child.getAttribute('chat'));
+    }
+    else if(child.tagName=="DIV"){
+      get_chat_history(child,out);
+    }
+    // Do something with the child element
+    
+  }
+  return out;
+}
   
   
-  
-    function run_llm_query(llm_url,message,gpt_text_elem){
-        fetch(llm_url+'&content='+encodeURIComponent(message),{credentials: "same-origin"})
+    function run_llm_query(llm_url,message,history,gpt_text_elem){
+        let history_str = "";
+        if(history!=null){
+            history_str = "&history="+encodeURIComponent(JSON.stringify(history));
+        }
+        fetch(llm_url+'&content='+encodeURIComponent(message)+history_str,{credentials: "same-origin"})
         //fetch('tes.php?content='+message)
           .then(response => {
           //console.log(response)
@@ -19,7 +38,7 @@
                   
       
                 gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(headerString+"");
-                
+                                
               throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response.body;
@@ -39,8 +58,8 @@
                 // Decode the chunk to a string and log it
                 //let elem = document.getElementById("gpt-text-"+reqno);
                 gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
-                
-                console.log(decoder.decode(value));
+                gpt_text_elem.parentNode.parentNode.setAttribute("chat",gpt_text_elem.parentNode.parentNode.getAttribute("chat")+decoder.decode(value));
+                //console.log(decoder.decode(value));
 
                 // Read the next chunk
                 return read();
@@ -55,12 +74,18 @@
   
     function run_message_continue(el,el2,message){
         //let reqno = add_interaction(message);
+        
+        llm_chat = findParentByClassName(el,"llm_interaction");
+        let history = get_chat_history(llm_chat);
+        
         let reqno = add_interaction_continue(el,el2,message);
         
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
         
-        run_llm_query(llm_url,message,gpt_text_elem);
+        
+
+        run_llm_query(llm_url,message,history,gpt_text_elem);
         
     }
     
@@ -106,7 +131,7 @@
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-"+reqno);
         
-        run_llm_query(llm_url,message,gpt_text_elem);
+        run_llm_query(llm_url,message,null,gpt_text_elem);
         
         
     }

@@ -14,6 +14,23 @@ function template(name,...replaces){
     return newDiv;
 }
 
+function findParentByClassName(element, className) {
+    let currentElement = element;
+  
+    if (currentElement.classList.contains(className)) {
+        return currentElement;
+    }
+
+    while (currentElement && currentElement.parentNode) {
+      currentElement = currentElement.parentNode;
+  
+      if (currentElement.classList.contains(className)) {
+        return currentElement;
+      }
+    }
+  
+    return null; // return null if not found
+}
 
 
 
@@ -28,9 +45,9 @@ function add_interaction_continue(el,el2,message){
     
      let message_interaction = template("template_message_continue",
                                 ["!!USER-REQUEST!!",textToHtml(message)],
-                                ["!!REQNO!!",interaction_no+""]); 
-                                
+                                ["!!REQNO!!",interaction_no+""]);   
      el.appendChild(message_interaction);      
+     document.getElementById("user-message-cont-"+interaction_no).setAttribute("chat",message);
      add_reply_to(el);
      return interaction_no;               
     
@@ -54,8 +71,12 @@ function add_interaction(message){
     let message_interaction = template("template_message_interaction",
                                 ["!!USER-REQUEST!!",textToHtml(message)],
                                 ["!!REQNO!!",interaction_no+""]); 
+
+    message_interaction.classList.add("llm_interaction");
+      
     cma.insertBefore(message_interaction, cma.firstChild);
-    
+    document.getElementById("user-message-"+interaction_no).setAttribute("chat",message);
+
     
     add_reply_to(cma.firstChild);
     //cma.firstChild.appendChild(reply_to);
