@@ -96,10 +96,32 @@ foreach ($email_data as $email) {
 if($primary_email!=""){
     $session_id = generateRandomString(32);
     $user_id = ($user_data['id']*1)."";
+    if(!is_numeric($user_id))exit("USER ID SHOULD BE A NUMBER");
     $user_email = $primary_email;
     
     header('Create-Session: ' . base64_encode("$session_id, github, gith$user_id, $user_email"));
     @file_put_contents("$BASE_DIR/working_data/sessions/$session_id.txt","github, gith$user_id, $user_email");
+    
+    $user_id = "gith$user_id";
+    if(!file_exists("$BASE_DIR/working_data/users/$user_id/user_id.txt" )){
+        $secret_key = $_COOKIE["propesedKey"];
+        
+        $userdir = "$BASE_DIR/working_data/users/$user_id";
+        @mkdir($userdir,0777,true);
+        file_put_contents("$userdir/user_id.txt",$user_id);
+        file_put_contents("$userdir/user_email.txt",$user_email);
+        file_put_contents("$userdir/secret_key.txt",$secret_key);     
+        setcookie("r_user_secret",$secret_key,0,"/"); 
+    } else {
+        if(file_exists("$BASE_DIR/working_data/users/$user_id/secret_key.txt" )){
+            $userdir = "$BASE_DIR/working_data/users/$user_id";
+            $secret_key = file_get_contents("$userdir/secret_key.txt");
+            setcookie("r_user_secret",$secret_key,0,"/");
+        }
+    }
+    
+    setcookie("propesedKey","",0,"/");
+
     setcookie("r_ression_id",$session_id,0,"/");
     header('Location: ' . "../index.html");
 }

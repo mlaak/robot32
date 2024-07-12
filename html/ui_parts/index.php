@@ -33,7 +33,7 @@
 
       <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages-area">
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md text-lg" id="initial-message">
-          <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today?</p>
+          <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today? <button class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto" onclick="load_previous_chat();">Load previous</button> </p>
         </div>
         <?php require __DIR__."/maincontent/welcome.htm";?>
       </div>  <!--chat-messages-area-->
@@ -67,6 +67,14 @@
     <?php echo "<!--";require __DIR__."/templates/template_message_interaction.htm";?>
     <?php echo "<!--";require __DIR__."/templates/template_message_continue.htm";?>
     <?php echo "<!--";require __DIR__."/templates/template_picture_modal.htm";?>
+
+    <?php echo "<!--";require __DIR__."/templates/tpl_ai_response_cont.htm";?>
+    <?php echo "<!--";require __DIR__."/templates/tpl_ai_response_initial.htm";?>
+    <?php echo "<!--";require __DIR__."/templates/tpl_interaction.htm";?>
+    <?php echo "<!--";require __DIR__."/templates/tpl_usr_query_cont.htm";?>
+    <?php echo "<!--";require __DIR__."/templates/tpl_usr_query_inital.htm";?>
+
+
 </div>  
  
   
@@ -74,17 +82,40 @@
 
 <script src="beep.jsi"></script>
 <script>
+
+
+
     <?php include __DIR__."/js/functions.js";?>
+
+
+
 
     if(!checkCookieExists('r_ression_id')){
         window.location.href="login.html";
     }
 
+    var ClientSecretKey=null;
+    async function loadSecret(){
+        try{
+          var cook = getCookie("r_user_secret");
+          if(cook!=null){
+            var secret = decodeURIComponent(cook);
+            ClientSecretKey = await window.crypto.subtle.importKey("jwk",JSON.parse(secret),"AES-GCM",true, ['encrypt', 'decrypt']);
+          }
+        }
+        catch(err){
+          console.log(err);
+        }
+    }
+    loadSecret();
+
+
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
           document.getElementById('sidebar-menu').classList.toggle('hidden');
     });
 
-    <?php include __DIR__."/js/add-interaction.js"; ?> 
+    <?php include __DIR__."/js/add-interaction.js"; ?>
+    <?php include __DIR__."/js/load-previous-chat.js"; ?> 
     <?php include __DIR__."/js/run-message.js"; ?> 
     <?php include __DIR__."/js/make-modal.js"; ?>  
     <?php include __DIR__."/js/speech-to-text.js"; ?>

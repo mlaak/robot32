@@ -32,5 +32,34 @@
             </div>
 
 </body>
+
+<script>
+async function generateKey() {
+    const key = await window.crypto.subtle.generateKey(
+        { name: "AES-GCM", length: 256 },
+        true,
+        ["encrypt", "decrypt"]
+    );
+    return key;
+}
+
+
+
+async function makeKey(){
+    const myKey = await generateKey();
+    const myKeyStr = JSON.stringify(await window.crypto.subtle.exportKey("jwk", myKey));
+
+
+    document.cookie = "propesedKey="+myKeyStr;
+
+    checkKey = await window.crypto.subtle.importKey("jwk",JSON.parse(myKeyStr),"AES-GCM",true, ['encrypt', 'decrypt']);
+
+    console.log(myKeyStr);
+    console.log(checkKey);
+}
+
+makeKey();
+
+</script>
 </html>
 

@@ -2,7 +2,7 @@
 function get_chat_history(element,out = []){
   for (let i = 0; i < element.children.length; i++) {
     const child = element.children[i];
-    console.log("child is",child,child.tagName);
+    //console.log("child is",child,child.tagName);
     if(child.getAttribute('role') == "user" || child.getAttribute('role') == "ai"){
       out.push(child.getAttribute('role')+":"+child.getAttribute('chat'));
     }
@@ -14,10 +14,39 @@ function get_chat_history(element,out = []){
   }
   return out;
 }
+    async function saveHistoryImg(parent_req_no,val){
+      let encryptedData = await encryptText(val,ClientSecretKey);
+      localStorage.setItem("img"+parent_req_no,encryptedData);
+    }
+
+    async function saveHistory(history,parent_req_no){
+     /* const textEncoder = new TextEncoder();
+      let dt = textEncoder.encode(JSON.stringify(history));
+      const encryptedData = await window.crypto.subtle.encrypt(
+        {
+          name: 'AES-GCM',
+          iv: window.crypto.getRandomValues(new Uint8Array(12)), // the initialization vector should be unique for each encryption
+        },
+        ClientSecretKey,
+        dt
+      );*/
+      let encryptedData = await encryptText(JSON.stringify(history),ClientSecretKey);
+     
+      console.log(encryptedData);
+        
+      localStorage.setItem("history"+parent_req_no,encryptedData);
+
+      console.log(localStorage.getItem("history"+parent_req_no));
+
+
+
+    }
   
-  
-    function run_llm_query(llm_url,message,history,gpt_text_elem){
+    function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
         let history_str = "";
+
+        let llm_response = "";
+
         if(history!=null){
             history_str = "&history="+encodeURIComponent(JSON.stringify(history));
         }
@@ -51,12 +80,25 @@ function get_chat_history(element,out = []){
             function read() {
               return reader.read().then(({ done, value }) => {
                 if (done) {
+                  if(history==null)history = [];
+                  history.push("user:"+message);
+                  history.push("ai:"+llm_response);
+                  
+
+                  saveHistory(history,parent_req_no);
+
+
+                  console.log(history);
+
                   console.log('Stream reading complete');
+
                   return;
                 }
 
                 // Decode the chunk to a string and log it
                 //let elem = document.getElementById("gpt-text-"+reqno);
+                llm_response+=decoder.decode(value);
+
                 gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
                 gpt_text_elem.parentNode.parentNode.setAttribute("chat",gpt_text_elem.parentNode.parentNode.getAttribute("chat")+decoder.decode(value));
                 //console.log(decoder.decode(value));
@@ -80,18 +122,26 @@ function get_chat_history(element,out = []){
         
         let reqno = add_interaction_continue(el,el2,message);
         
+
+        var prn = findParentByClassName(el,"llm_interaction");
+        let parent_req_no = prn.getAttribute("interaction_no");
+
+        localStorage.setItem("reqno",reqno);
+
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
         
         
 
-        run_llm_query(llm_url,message,history,gpt_text_elem);
+        run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
         
     }
     
     function run_message(message){
         let reqno = add_interaction(message);
         
+        localStorage.setItem("reqno",reqno);
+
         let messageBox = document.getElementById("message-box");
         messageBox.value = "";
         messageBox.style.height = 'auto';
@@ -110,6 +160,9 @@ function get_chat_history(element,out = []){
 //            document.getElementById("gpt-image-"+reqno).src = data.image;
             document.getElementById("gpt-image-"+reqno).src_link = data.image;
             
+            saveHistoryImg(reqno,data.image);
+            //localStorage.setItem("img"+reqno,data.image);
+
             console.log(data);
             
             var picture_modal = document.getElementById("template_picture_modal").innerHTML;
@@ -131,7 +184,31 @@ function get_chat_history(element,out = []){
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-"+reqno);
         
-        run_llm_query(llm_url,message,null,gpt_text_elem);
+        
+        if(llm_url!="R32"){
+          run_llm_query(llm_url,reqno,message,null,gpt_text_elem);
+        }
+        else {
+          fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
+          .then(response => response.text())
+          .then(data => {
+            if(data.includes("CCL1")){
+              run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+            }
+            else {
+              run_llm_query("experts/general?model=mistralai/mixtral-8x22b-instruct",reqno,message,null,gpt_text_elem);
+            }
+            // do something with the data here
+          });
+  //            document.getElementById("gpt-image-"+reqno).src = data.image;
+            //document.getElementById("gpt-image-"+reqno).src_link = data.image;
+          
+        }
+
+        
+
+
+        
         
         
     }

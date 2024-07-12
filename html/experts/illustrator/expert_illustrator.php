@@ -22,6 +22,9 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, array(
 ));
 curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15); 
+curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
 $result = curl_exec($ch);
 curl_close($ch);
 

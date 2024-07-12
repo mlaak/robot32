@@ -81,8 +81,12 @@ id="chat-input-area">
     class="p-2 border border-zinc-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white text-lg w-full md:w-auto"
     id="model-select">
     <!--<option value="routers/groq/groq.php?model=mixtral-8x7b-32768">R32-M</option>-->
+    
+    <option value="R32">R32!</option>
     <option value="experts/general?model=mistralai/mixtral-8x7b-instruct">R32-M</option>
     <option value="experts/general?model=mistralai/mixtral-8x22b-instruct">R32-L</option>
+    <option value="experts/fake?model=fake">FAKE LLM</option>
+    <option value="experts/classifier?model=mistralai/mixtral-8x7b-instruct">Classifier</option>
     <option value="experts/remote_llms?model=openai/gpt-4o-2024-05-13">$ GPT-4o</option>
     <option value="experts/remote_llms?model=google/gemini-flash-1.5">$ Gemini-F</option>
     <option value="experts/remote_llms?model=perplexity/llama-3-sonar-large-32k-online">$ Perplexity</option>
@@ -166,7 +170,7 @@ document.addEventListener('keydown', function(event) {
 
       <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages-area">
         <div class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md text-lg" id="initial-message">
-          <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today?</p>
+          <p class="text-zinc-800 dark:text-zinc-200">Hello! How can I assist you today? <button class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto" onclick="load_previous_chat();">Load previous</button> </p>
         </div>
         <div> 
   <div class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg " id="user-message">
@@ -314,6 +318,63 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
         </div>
     </div>
 </div>
+
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="tpl_ai_response_cont" style="display:hidden">
+
+  <div id="gpt-message--!!REQNO!!" role="ai" chat="" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" > 
+    <pre style = "white-space: pre-wrap" ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200">!!AI-RESPONSE!!</p>
+    </pre>  
+  </div> <!--gpt-message--!!REQNO!!-->
+
+</div>
+
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="tpl_ai_response_initial" style="display:hidden">
+
+  <div id="gpt-message--!!REQNO!!" role="ai" chat="" class="bg-white dark:bg-zinc-800 p-4 rounded-lg shadow-md flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 text-lg" > 
+    <img src="!!IMG-LINK!!" width="200" height="200" alt="generated image" class="rounded-md shadow-md cursor-pointer" id="gpt-image-!!REQNO!!" />
+    <pre style = "white-space: pre-wrap" ><p id="gpt-text-!!REQNO!!" class="text-zinc-800 dark:text-zinc-200">!!AI-RESPONSE!!</p>
+    </pre>  
+  </div> <!--gpt-message--!!REQNO!!-->
+
+</div>
+
+    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="tpl_interaction" style="display:hidden">
+
+<div id="interaction-!!REQNO!!">
+
+</div>
+
+</div>
+        <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="tpl_usr_query_cont" style="display:hidden">
+
+  <div id="user-message-!!REQNO!!" role="user" chat="" class="bg-teal-500 text-white p-4 rounded-lg shadow-md self-end text-lg">
+    <p>!!USER-REQUEST!!</p>
+  </div>
+  
+</div>    <!--<script src="https://cdn.tailwindcss.com/3.4.3"></script>
+<!-- dont remove this comment here -->
+
+<div id="tpl_usr_query_initial" style="display:hidden">
+
+  <div id="user-message-!!REQNO!!" role="user" chat="" class="bg-blue-500 text-white p-4 rounded-lg shadow-md self-end text-lg">
+    <p>!!USER-REQUEST!!</p>
+  </div>
+  
+</div>
+
+
 </div>  
  
   
@@ -321,6 +382,9 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
 
 <script src="beep.jsi"></script>
 <script>
+
+
+
     function textToHtml(text) {
   const entities = {
     '&': '&amp;',
@@ -331,6 +395,20 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
   };
 
   return text.replace(/[&<>"']/g, (match) => entities[match]);
+}
+
+
+function getCookie(name) {
+  const cookieString = document.cookie;
+  const cookieStart = cookieString.indexOf(`${name}=`);
+  if (cookieStart === -1) {
+    return null;
+  }
+  const cookieEnd = cookieString.indexOf(';', cookieStart);
+  if (cookieEnd === -1) {
+    return cookieString.substring(cookieStart + name.length + 1);
+  }
+  return cookieString.substring(cookieStart + name.length + 1, cookieEnd);
 }
 
 
@@ -345,9 +423,91 @@ function checkCookieExists(name) {
   return false;
 }
 
+function naturalSort(arr) {
+  const collator = new Intl.Collator(undefined, {
+      numeric: true,
+      sensitivity: 'base'
+  });
+  return arr.sort(collator.compare);
+}
+
+async function decryptText(dt,secretKey){
+  
+  dt = JSON.parse(dt);
+
+
+  //console.log("123",dt,dt.encrypted,new Uint8Array(dt.encrypted));
+  //console.log("here");
+  let decrypted = null;
+  try{
+    //console.log("iva");
+    let iva = new Uint8Array(dt.iv);
+    //console.log("ena");
+    let ena = new Uint8Array(dt.encrypted);
+    //console.log("ssss",iva,ena);
+    decrypted = await window.crypto.subtle.decrypt(
+      {name: "AES-GCM",iv: iva},
+      secretKey,ena
+    );
+  }
+  catch(e){
+    console.log("GOT ERROR from window.crypto.subtle.decrypt",e);
+    return null;
+  }
+  //console.log("not here");
+
+    //console.log("!!!",decrypted);
+
+    let dec = new TextDecoder();
+    return dec.decode(decrypted);
+}
+
+async function encryptText(txt,secretKey){
+  const textEncoder = new TextEncoder();
+  let dt = textEncoder.encode(txt);
+  let iv = window.crypto.getRandomValues(new Uint8Array(12)); // the initialization vector should be unique for each encryption
+  const encryptedData = await window.crypto.subtle.encrypt(
+    {
+      name: 'AES-GCM',
+      iv: iv
+    },
+    secretKey,
+    dt
+  );
+  let ee= Array.from(new Uint8Array(encryptedData));
+  let decrypted = await window.crypto.subtle.decrypt(
+    {name: "AES-GCM",iv: iv},
+    secretKey,new Uint8Array(ee)
+  );
+
+
+  console.log("dc",decrypted);
+
+  return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
+}
+
+
+
+
     if(!checkCookieExists('r_ression_id')){
         window.location.href="login.html";
     }
+
+    var ClientSecretKey=null;
+    async function loadSecret(){
+        try{
+          var cook = getCookie("r_user_secret");
+          if(cook!=null){
+            var secret = decodeURIComponent(cook);
+            ClientSecretKey = await window.crypto.subtle.importKey("jwk",JSON.parse(secret),"AES-GCM",true, ['encrypt', 'decrypt']);
+          }
+        }
+        catch(err){
+          console.log(err);
+        }
+    }
+    loadSecret();
+
 
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
           document.getElementById('sidebar-menu').classList.toggle('hidden');
@@ -357,7 +517,7 @@ function checkCookieExists(name) {
     var s = document.getElementById(name).innerHTML;
     
     
-    console.log(replaces);
+    //console.log(replaces);
     
     if(replaces){
         replaces.forEach(function(r) {
@@ -391,6 +551,7 @@ function findParentByClassName(element, className) {
 
 let interaction_no = 0;
 
+interaction_no = localStorage.getItem("reqno")*1;
 
 function add_interaction_continue(el,el2,message){
     interaction_no += 1;
@@ -428,6 +589,7 @@ function add_interaction(message){
                                 ["!!REQNO!!",interaction_no+""]); 
 
     message_interaction.classList.add("llm_interaction");
+    message_interaction.setAttribute("interaction_no",interaction_no);
       
     cma.insertBefore(message_interaction, cma.firstChild);
     document.getElementById("user-message-"+interaction_no).setAttribute("chat",message);
@@ -460,12 +622,137 @@ function add_interaction(message){
 
 
 
+function restore_interaction(reqno,img,history){
+
+    
+    if(history == null)return 0;
+    if(document.getElementById("interaction-"+reqno)!=null)return 0;
+
+    let cma = document.getElementById("chat-messages-area");
+    
+
+    
+    let message_interaction = template("tpl_interaction",
+                                ["!!REQNO!!",reqno]); 
+
+    message_interaction.classList.add("llm_interaction");
+    message_interaction.setAttribute("interaction_no",reqno);
+      
+    cma.insertBefore(message_interaction, document.getElementById("initial-message"));
+    
+    let firstUser = true;
+    let firtResponse = true;
+
+    for(i=0;i<history.length;i++){
+        let h = history[i]+"";
+        if(h.startsWith("user:")){
+            let mess = h.substring(5);
+            interaction_no += 1;
+
+            if(firstUser){
+                var usrt = template("tpl_usr_query_initial", 
+                    ["!!USER-REQUEST!!",textToHtml(mess)],
+                    ["!!REQNO!!",interaction_no+""]);
+                firstUser = false;
+            } else {
+                var usrt = template("tpl_usr_query_cont", 
+                    ["!!USER-REQUEST!!",textToHtml(mess)],
+                    ["!!REQNO!!",interaction_no+""]);
+            }
+
+
+            message_interaction.appendChild(usrt);
+        }
+        else if(h.startsWith("ai:")){
+            let mess = h.substring(3);
+            interaction_no += 1;
+            if(firtResponse){
+                var airesp = template("tpl_ai_response_initial",
+                    ["!!IMG-LINK!!",img], 
+                    ["!!AI-RESPONSE!!",textToHtml(mess)],
+                    ["!!REQNO!!",interaction_no+""]);
+                firtResponse = false;
+            }
+            else {
+                var airesp = template("tpl_ai_response_cont", 
+                    ["!!AI-RESPONSE!!",textToHtml(mess)],
+                    ["!!REQNO!!",interaction_no+""]);
+            }
+            message_interaction.appendChild(airesp);
+        }
+    }
+
+    //add_reply_to(cma.firstChild);
+    //cma.firstChild.appendChild(reply_to);
+    
+    return interaction_no;
+}
+
+
+
+
+    function load_previous_chat(){
+    do_load_previous_chat();
+}
+
+async function do_load_previous_chat(){
+    let all_keys = Object.keys(localStorage);
+    all_keys = naturalSort(all_keys);
+    all_keys = all_keys.reverse();
+
+    let displayed = 0;
+    let max = 10;
+
+    for (let i = 0; i < all_keys.length; i++) {
+        if(all_keys[i].startsWith("history")){
+            let r = await load_chat_part(all_keys[i]);
+            if(r!=0){
+                //console.log("rrrrrrrrrrrrrrrrrrrrr",r);
+                displayed++;
+            }
+            if(displayed>=max)break; 
+        }
+        console.log(all_keys[i]);
+    }
+}
+
+async function load_chat_part(id){
+    //console.log("load chat part");
+    let num = id.substring(7)*1;
+    let dt = localStorage.getItem(id);
+
+    //console.log(id,dt);
+    let decrypted =await decryptText(dt,ClientSecretKey);
+    //console.log("jjj",decrypted);
+    let dat = JSON.parse(decrypted);
+
+    let img_dt = localStorage.getItem("img"+num);
+    //console.log("here 1");
+    let img_src = "";
+    if(img_dt!=null){
+        img_src = await decryptText(img_dt,ClientSecretKey);
+    }
+
+    console.log("here");
+    console.log(num,img_src,dat);
+
+    return restore_interaction(num,img_src,dat);
+
+    /*let decrypted = await window.crypto.subtle.decrypt(
+        {name: "AES-GCM",iv: dt.iv},
+        key,dt.encrypted
+      );
+      let dec = new TextDecoder();
+      let txt = dec.decode(decrypted);*/
+}
+
+
  
     
 function get_chat_history(element,out = []){
   for (let i = 0; i < element.children.length; i++) {
     const child = element.children[i];
-    console.log("child is",child,child.tagName);
+    //console.log("child is",child,child.tagName);
     if(child.getAttribute('role') == "user" || child.getAttribute('role') == "ai"){
       out.push(child.getAttribute('role')+":"+child.getAttribute('chat'));
     }
@@ -477,10 +764,39 @@ function get_chat_history(element,out = []){
   }
   return out;
 }
+    async function saveHistoryImg(parent_req_no,val){
+      let encryptedData = await encryptText(val,ClientSecretKey);
+      localStorage.setItem("img"+parent_req_no,encryptedData);
+    }
+
+    async function saveHistory(history,parent_req_no){
+     /* const textEncoder = new TextEncoder();
+      let dt = textEncoder.encode(JSON.stringify(history));
+      const encryptedData = await window.crypto.subtle.encrypt(
+        {
+          name: 'AES-GCM',
+          iv: window.crypto.getRandomValues(new Uint8Array(12)), // the initialization vector should be unique for each encryption
+        },
+        ClientSecretKey,
+        dt
+      );*/
+      let encryptedData = await encryptText(JSON.stringify(history),ClientSecretKey);
+     
+      console.log(encryptedData);
+        
+      localStorage.setItem("history"+parent_req_no,encryptedData);
+
+      console.log(localStorage.getItem("history"+parent_req_no));
+
+
+
+    }
   
-  
-    function run_llm_query(llm_url,message,history,gpt_text_elem){
+    function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
         let history_str = "";
+
+        let llm_response = "";
+
         if(history!=null){
             history_str = "&history="+encodeURIComponent(JSON.stringify(history));
         }
@@ -514,12 +830,25 @@ function get_chat_history(element,out = []){
             function read() {
               return reader.read().then(({ done, value }) => {
                 if (done) {
+                  if(history==null)history = [];
+                  history.push("user:"+message);
+                  history.push("ai:"+llm_response);
+                  
+
+                  saveHistory(history,parent_req_no);
+
+
+                  console.log(history);
+
                   console.log('Stream reading complete');
+
                   return;
                 }
 
                 // Decode the chunk to a string and log it
                 //let elem = document.getElementById("gpt-text-"+reqno);
+                llm_response+=decoder.decode(value);
+
                 gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
                 gpt_text_elem.parentNode.parentNode.setAttribute("chat",gpt_text_elem.parentNode.parentNode.getAttribute("chat")+decoder.decode(value));
                 //console.log(decoder.decode(value));
@@ -543,18 +872,26 @@ function get_chat_history(element,out = []){
         
         let reqno = add_interaction_continue(el,el2,message);
         
+
+        var prn = findParentByClassName(el,"llm_interaction");
+        let parent_req_no = prn.getAttribute("interaction_no");
+
+        localStorage.setItem("reqno",reqno);
+
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
         
         
 
-        run_llm_query(llm_url,message,history,gpt_text_elem);
+        run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
         
     }
     
     function run_message(message){
         let reqno = add_interaction(message);
         
+        localStorage.setItem("reqno",reqno);
+
         let messageBox = document.getElementById("message-box");
         messageBox.value = "";
         messageBox.style.height = 'auto';
@@ -573,6 +910,9 @@ function get_chat_history(element,out = []){
 //            document.getElementById("gpt-image-"+reqno).src = data.image;
             document.getElementById("gpt-image-"+reqno).src_link = data.image;
             
+            saveHistoryImg(reqno,data.image);
+            //localStorage.setItem("img"+reqno,data.image);
+
             console.log(data);
             
             var picture_modal = document.getElementById("template_picture_modal").innerHTML;
@@ -594,7 +934,31 @@ function get_chat_history(element,out = []){
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-"+reqno);
         
-        run_llm_query(llm_url,message,null,gpt_text_elem);
+        
+        if(llm_url!="R32"){
+          run_llm_query(llm_url,reqno,message,null,gpt_text_elem);
+        }
+        else {
+          fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
+          .then(response => response.text())
+          .then(data => {
+            if(data.includes("CCL1")){
+              run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+            }
+            else {
+              run_llm_query("experts/general?model=mistralai/mixtral-8x22b-instruct",reqno,message,null,gpt_text_elem);
+            }
+            // do something with the data here
+          });
+  //            document.getElementById("gpt-image-"+reqno).src = data.image;
+            //document.getElementById("gpt-image-"+reqno).src_link = data.image;
+          
+        }
+
+        
+
+
+        
         
         
     }

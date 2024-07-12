@@ -55,12 +55,12 @@ func main() {
 	code498Limiter =   NewRateLimiter(1,      0,      0,     0,        0,          0,         0,         0)
 	code498Limiter.responseCode = 498; //expired or otherwise invalid token
 	
-	expertIPLimiter =  NewRateLimiter(2,     60,    300,  3000,       10,        500,    500000,   5000000)
+	expertIPLimiter =  NewRateLimiter(2,     60,    300,  3000,       10,       1000,    500000,   5000000)
 	expertAIPLimiter = NewRateLimiter(3,   6000,  60000,600000,      500,    5000000,  50000000, 500000000)
 	
-	expertUSRLimiter = NewRateLimiter(4,     60,    300,  3000,       10,        500,    500000,   5000000)
-	expertPAYLimiter = NewRateLimiter(5,     60,    300,  3000,       10,        500,    500000,   5000000)
-	expertKEYLimiter = NewRateLimiter(6,     60,    300,  3000,       10,        500,    500000,   5000000)
+	expertUSRLimiter = NewRateLimiter(4,     60,    300,  3000,       10,        5000,    500000,   5000000)
+	expertPAYLimiter = NewRateLimiter(5,     60,    300,  3000,       10,        5000,    500000,   5000000)
+	expertKEYLimiter = NewRateLimiter(6,     60,    300,  3000,       10,        5000,    500000,   5000000)
 
     staticIPLimiter =  NewRateLimiter(7,   6000,  60000,600000,     1000,         -1,        -1,        -1)
 

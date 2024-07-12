@@ -18,41 +18,53 @@ $headers = [
 $url = "https://openrouter.ai/api/v1/chat/completions"; 
 
 
-$ai = new Robot32lib\GPTlib\GPTlib($url,$headers,false);
-$ai->setHistory($_REQUEST["history"] ?? null);
+$ai = new Robot32lib\GPTlib\GPTlib($url,$headers,FALSE);
+//$ai->setHistory($_REQUEST["history"] ?? null);
 
 $options = [
     "temperature"=> 1,
-    "max_tokens"=> 8024,
+    "max_tokens"=> 20,
     "top_p"=> 1,
     "stream"=> true,
     "stop"=> null
     ];
 $content = $_REQUEST["content"];
-$model = $_REQUEST["model"];
+//$model = $_REQUEST["model"];
 
+$model = 'mistralai/mixtral-8x7b-instruct';
 
-
+//check this
 if(!in_array($model, ['mistralai/mixtral-8x7b-instruct',"mistralai/mixtral-8x22b-instruct"])){
     echo "Model not supported!";    
 }
 
 
-$r = $ai->chat($content,$model,$options,function($txt,$data){
+
+/*$r = $ai->chat($content,$model,$options,function($txt,$data){
     if(!headers_sent())header("openrouter-id: ".$data['id']);
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
-}); 
-//$r = $ai->chat($_REQUEST["content"],$_REQUEST["model"],$history);
+});*/ 
+
+$chat = $_REQUEST["content"];
+
+$chat = str_replace('"','',$chat);
+
+$classifier_text = file_get_contents(__DIR__."/classifier_text.txt");
+
+$c = $classifier_text."\n".'"'.$chat;
+
+$r = $ai->chat($c,$model);
+
+echo $r["text"];
+//print_r($r);
 
 
-
-
-require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
+/*require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
 
 $logger = new Robot32lib\ULogger\ULogger($BASE_DIR);
 $logger->log($content,$model,$r['text'],$r['data']['id'],$r['data']['usage']['prompt_tokens'],$r['data']['usage']['completion_tokens'],$r['cost']);
-
+*/
 
 // ********************************** LOG IT *****************************
 /*$currentTime = time();
