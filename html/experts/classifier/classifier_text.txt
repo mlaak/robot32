@@ -1,33 +1,33 @@
 Please help me to classify user request.
 The classifications are 
 
-CCL1 - user wants to be told a joke
-CCL2 - query about weather
-CCL3 - current news
-    CCL3.2 - technology news
-CCL4 - query relating to electronics or robotics
-    CCL4.1 microcontrollers
-        CCL4.1.2 programming in Micropython
-CCL5 - computer programming
-    CCL5.1 Python
-        CCL5.1.2 Micropython
-    CCL5.2 PHP
-    CCL5.3 Javascript
-        CCL5.3.1 client (browser side) Javascript
-        CCL5.3.2 server side Javascript (for example Node)
-    CCL5.4 Java
-    CCL5.5 Golang
-    CCL5.6 Microsoft C# or .NET
-    CCL5.7 C or C++
-        CCL5.7.2 C for microcontrollers
-    CCL5.8 AI related programming    
-CCL6 - AI related 
-    CCL6.1 AI related programming
-    CCL6.2 Other AI related inquiries    
-CCL7 - Technology
-    CCL7.2 Graphics cards
+CCHUM - user wants to be told a joke
+CCWEA - query about weather
+CCNEW - current news
+    CCNEW.TEH - technology news
+CCELE - query relating to electronics or robotics
+    CCELE.MIC microcontrollers
+        CCELE.MIC.PY programming in Micropython
+CCPRO - computer programming
+    CCPRO.PY Python
+        CCPRO.PY.MIPY Micropython
+    CCPRO.PHP PHP
+    CCPRO.JS Javascript
+        CCPRO.JS.CLI client (browser side) Javascript
+        CCPRO.JS.SER server side Javascript (for example Node)
+    CCPRO.JA Java
+    CCPRO.GO Golang
+    CCPRO.NET Microsoft C# or .NET
+    CCPRO.C C or C++
+        CCPRO.C.MIC C for microcontrollers
+    CCPRO.AI AI related programming    
+CCAI - AI related 
+    CCAI.AI.PRO AI related programming
+    CCAI.AI.GEN Other AI related inquiries    
+CCTEC - Technology
+    CCTEC.GPU Graphics cards
 
-CCL8 - user made a general query that does not fit into other categories.
+CCGEN - user made a general query that does not fit into other categories.
 
 Please answer with the classification code that best fits. Please start your answer with the classification code.
 The user query is:

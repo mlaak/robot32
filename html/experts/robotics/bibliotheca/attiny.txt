@@ -1,0 +1,3 @@
+user: Where can I find information about Attiny?
+
+ai: Look at https://en.wikipedia.org/wiki/ATtiny_microcontroller_comparison_chart

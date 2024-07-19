@@ -883,7 +883,14 @@ function get_chat_history(element,out = []){
         
         
 
-        run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
+        if(llm_url!="R32"){
+          run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
+        }
+        else {
+          let expert_url = llm_chat.getAttribute("expert_url");
+          if(!expert_url)expert_url = "experts/general?model=auto";
+          run_llm_query(expert_url,parent_req_no,message,history,gpt_text_elem);
+        }
         
     }
     
@@ -933,7 +940,8 @@ function get_chat_history(element,out = []){
         
         let llm_url = document.getElementById("model-select").value;
         gpt_text_elem = document.getElementById("gpt-text-"+reqno);
-        
+
+        let llm_chat = findParentByClassName(gpt_text_elem,"llm_interaction");
         
         if(llm_url!="R32"){
           run_llm_query(llm_url,reqno,message,null,gpt_text_elem);
@@ -942,15 +950,18 @@ function get_chat_history(element,out = []){
           fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
           .then(response => response.text())
           .then(data => {
-            if(data.includes("CCL1")){
+            if(data.includes("HUM")){
               run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+              llm_chat.setAttribute("expert_url","experts/humorist?a=1");
             }
-            else if(data.includes("CCL3.2") || data.includes("CCL4") || data.includes("CCL5") || 
-              data.includes("CCL6") || data.includes("CCL7")    
+            else if(data.includes("CCELE") || data.includes("CCPRO") || data.includes("CCAI") || 
+              data.includes("CCTEC")    
             ){
+              llm_chat.setAttribute("expert_url","experts/robotics?model=auto");
               run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
             }
             else {
+              llm_chat.setAttribute("expert_url","experts/general?model=auto");
               run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
             }
             // do something with the data here

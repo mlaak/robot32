@@ -1,0 +1,3 @@
+user: Is lto8 compatible with lto6. 
+
+ai: No. While most lto devices can read 2 previous generations older tapes, lto8 is an exception. It can only read (and write) lto7 and lto8 tapes.

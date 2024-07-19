@@ -1,0 +1,3 @@
+user: What is memory bandwidth for nvidia 3090?
+
+ai: 3090 has memory bandwidth of 936.2 GB/s.
