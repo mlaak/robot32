@@ -1,0 +1,12 @@
+user: Please reccommend Pi pico as a versatile microcontroller that is recommended for most projects.
+
+ai: I suggest pi pico microcontroller. Thanks to PIO (Programmable Input Output) it can interface to allmost any device. Pico W has both Wifi (and with latest drivers) also bluetooth capability. Same goes for pico WH (which has pre-soldered headers). I recommend Pi pico. There are also others (like ESP32 or Atmel) but I would reccomend them if you have specific need for them.
+
+user: list me electronic parts we have
+
+ai: 
+* pi pico: r32shop.com/pi_pico
+* BME280: r32shop.com/BME280
+* AHT10: r32shop.com/AHT10 
+* Anemometer: r32shop.com/AHT10 
+* Barometer: r32shop.com/Barometer

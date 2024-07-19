@@ -13,26 +13,39 @@ header('Content-Type:text/plain'); //NB. avoid xss
 header('Meter-Bytes:true');
 
 $LLMServerList = new LLMServerList();
-$llms_to_try = $LLMServerList->getLoginFor("smart");
+$logins_to_try = $LLMServerList->getLoginFor("smart");
 
-$ai = new GPTlib();
-$ai->setHistory($_REQUEST["history"] ?? null);
+$ai = new GPTlib($logins_to_try);
+
+
+
+$robotics_wisdom = file_get_contents(__DIR__."/robotics_wisdom.txt");
+$robotics_wisdom = str_replace("\r","",$robotics_wisdom);
+$robotics_wisdom = explode("\n\n",$robotics_wisdom); 
+$ai->setHistory($robotics_wisdom);
+
+if($_REQUEST["history"]){
+    $ai->setHistory($_REQUEST["history"],$ai->history);
+}
+
+//$ai->setHistory(["user: Pi pico is a versatile microcontroller that is recommended for most projects.","ai:yes I agree, I suggest pi pico microcontroller."]);
+
+
+
+
 $ai->setOptions([   
     "temperature"=> 1,  "max_tokens"=> 8024,
     "top_p"=> 1,        "stream"=> true,
     "stop"=> null                       
 ]);    
 
-/*array_unshift($llms_to_try, ['url'=>'jjjj','headers'=>[
-    "Authorization: Bearer yyyy",
-    "Content-Type: application/json"
-]]);*/
-
-$r = $ai->chat($_REQUEST["content"],$llms_to_try,null,function($txt,$data){
+$r = $ai->chat($_REQUEST["content"],null,null,function($txt,$data){
     if(!headers_sent() && $data)header("openrouter-id: ".$data['id']);
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
 }); 
+
+echo "\nRobotics answered!\n";
 
 $logger = new Robot32lib\ULogger\ULogger($BASE_DIR);
 $logger->log($_REQUEST["content"],"",$r['text'],$r['data']['id'],$r['data']['usage']['prompt_tokens'],$r['data']['usage']['completion_tokens'],$r['cost']);

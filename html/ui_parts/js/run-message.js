@@ -195,8 +195,13 @@ function get_chat_history(element,out = []){
             if(data.includes("CCL1")){
               run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
             }
+            else if(data.includes("CCL3.2") || data.includes("CCL4") || data.includes("CCL5") || 
+              data.includes("CCL6") || data.includes("CCL7")    
+            ){
+              run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
+            }
             else {
-              run_llm_query("experts/general?model=mistralai/mixtral-8x22b-instruct",reqno,message,null,gpt_text_elem);
+              run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
             }
             // do something with the data here
           });

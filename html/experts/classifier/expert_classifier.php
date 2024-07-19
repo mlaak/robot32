@@ -1,63 +1,48 @@
 <?php
-ignore_user_abort(true); //NB, otherwise might skip billing
 require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
+require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
+require __DIR__."/vendor/Robot32lib/LLMServerList/LLMServerList.php";
 
+ignore_user_abort(true); 
 header('Content-Type:text/plain'); //NB. avoid xss
 header('Meter-Bytes:true');
 
-require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
+$LLMServerList = new Robot32lib\LLMServerList\LLMServerList();
+$logins_to_try = $LLMServerList->getLoginFor("fast");
+$ai = new Robot32lib\GPTlib\GPTlib($logins_to_try);
+
+$ai->setOptions([
+    "temperature"=> 1,  "max_tokens"=> 20,
+    "top_p"=> 1,        "stream"=> false,
+    "stop"=> null,      "curl_timeout" => 10,
+    "curl_connect_timeout"=>5
+]);
+
+$user_query = str_replace('"','',$_REQUEST["content"]);
+$classifier_text = file_get_contents(__DIR__."/classifier_text.txt");
+$llm_query = $classifier_text."\n".'"'.$user_query.'"';
+
+$result = $ai->chat($llm_query);
+echo $result["text"];
 
 
+/*
 
-$OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));       
+
+$model = 'mistralai/mixtral-8x7b-instruct';
+
 $headers = [
     "Authorization: Bearer $OPENROUTER_API_KEY",
     "Content-Type: application/json"
 ];
 $url = "https://openrouter.ai/api/v1/chat/completions"; 
+*/
 
 
-$ai = new Robot32lib\GPTlib\GPTlib($url,$headers,FALSE);
-//$ai->setHistory($_REQUEST["history"] ?? null);
-
-$options = [
-    "temperature"=> 1,
-    "max_tokens"=> 20,
-    "top_p"=> 1,
-    "stream"=> true,
-    "stop"=> null
-    ];
-$content = $_REQUEST["content"];
-//$model = $_REQUEST["model"];
-
-$model = 'mistralai/mixtral-8x7b-instruct';
-
-//check this
-if(!in_array($model, ['mistralai/mixtral-8x7b-instruct',"mistralai/mixtral-8x22b-instruct"])){
-    echo "Model not supported!";    
-}
-
-
-
-/*$r = $ai->chat($content,$model,$options,function($txt,$data){
-    if(!headers_sent())header("openrouter-id: ".$data['id']);
-    echo $txt;
-    @flush(); @ob_flush(); @ob_clean();
-});*/ 
-
-$chat = $_REQUEST["content"];
-
-$chat = str_replace('"','',$chat);
-
-$classifier_text = file_get_contents(__DIR__."/classifier_text.txt");
-
-$c = $classifier_text."\n".'"'.$chat;
-
-$r = $ai->chat($c,$model);
-
-echo $r["text"];
 //print_r($r);
+
+
 
 
 /*require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
