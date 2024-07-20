@@ -1,6 +1,13 @@
 <?php
 
 $cwd = getcwd();
+
+chdir(__DIR__."/composer");
+if(!file_exists("composer.phar")){
+    passthru('curl "https://raw.githubusercontent.com/composer/getcomposer.org/76a7060ccb93902cd7576b67264ad91c8a2700e2/web/installer" > install_composer.php ');
+    passthru('php  install_composer.php');
+}
+
 chdir(__DIR__."/..");
 passthru("bash tools/bash_scripts/install_all.bash");
 passthru("bash tools/bash_scripts/compile_htmls.bash");
