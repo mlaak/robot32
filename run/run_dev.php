@@ -1,16 +1,13 @@
 <?php
 
-function runPrograms($program1,$cwd1, $program2, $cwd2) {
+function run_programs($program1,$cwd1, $program2, $cwd2) {
     $descriptorspec = array(
         0 => array("pipe", "r"),  // stdin
         1 => STDOUT,  // stdout
         2 => STDERR   // stderr
     );
 
-    // Start the first program
     $process1 = proc_open($program1, $descriptorspec, $pipes1, $cwd1);
-
-    // Start the second program
     $process2 = proc_open($program2, $descriptorspec, $pipes2, $cwd2);
 
     // Check if the processes started successfully
@@ -39,47 +36,6 @@ function runPrograms($program1,$cwd1, $program2, $cwd2) {
     }
 }
 
-// Example usage
-//$program1 = getExecutableCommand('program1');
-//$program2 = getExecutableCommand('program2');
-
-//runPrograms($program1,"", $program2);
-
-/*
-function getExecutableCommand($programName) {
-    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
-        // Windows
-        return $programName . '.exe';
-    } else {
-        // Linux and macOS
-        return './' . $programName;
-    }
-}*/
-
-
-runPrograms("bash devserver_8080.bash", __DIR__."/../goserver_reverse_proxy/",
+run_programs("bash devserver_8080.bash", __DIR__."/../goserver_reverse_proxy/",
             "php -S localhost:8000",    __DIR__."/../html/"
 );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
