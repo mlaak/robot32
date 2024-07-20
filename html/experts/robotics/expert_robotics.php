@@ -1,12 +1,7 @@
 <?php
 require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
-require __DIR__."/vendor/Robot32lib/LLMServerList/LLMServerList.php";
-require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
-require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
-
-require __DIR__."/vendor/Robot32lib/Biblio/Biblio.php";
-
+require __DIR__."/vendor/autoload.php";
 use Robot32lib\LLMServerList\LLMServerList;
 use Robot32lib\GPTlib\GPTlib;
 use Robot32lib\ULogger\ULogger;
@@ -19,15 +14,15 @@ header('Meter-Bytes:true');
 $LLMServerList = new LLMServerList();
 $llms_to_try = $LLMServerList->getLLMFor("smart");
 
-$ai = new GPTlib();
-
 $bib = new Biblio(__DIR__."/bibliotheca");
-$robotics_wisdom = trim(file_get_contents(__DIR__."/robotics_wisdom.txt"));
-$robotics_wisdom.= "\n\n".$bib->getWisdom($_REQUEST["content"]);
+$robotics_wisdom = trim(file_get_contents(__DIR__."/robotics_wisdom.txt"))."\n\n";
+$robotics_wisdom.= $bib->getWisdom($_REQUEST["content"]);
 
-$robotics_wisdom = trim(str_replace("\r","",$robotics_wisdom));
+$robotics_wisdom = trim(str_replace("\n\r","\n",$robotics_wisdom));
+$robotics_wisdom = trim(str_replace("\r","\n",$robotics_wisdom));
 $robotics_wisdom = explode("\n\n",$robotics_wisdom); 
-//print_r($robotics_wisdom);
+
+$ai = new GPTlib();
 $ai->setHistory($robotics_wisdom);
 
 if($_REQUEST["history"]){
@@ -35,7 +30,9 @@ if($_REQUEST["history"]){
 }
    
 $r = $ai->chat($_REQUEST["content"],$llms_to_try,null,function($txt,$data){
-    if(!headers_sent() && $data)header("openrouter-id: ".$data['id']);
+    if(!headers_sent() && $data){
+        header("openrouter-id: ".$data['id']);
+    }
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
 }); 

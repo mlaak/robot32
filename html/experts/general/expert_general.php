@@ -1,9 +1,8 @@
 <?php
 require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
-require __DIR__."/vendor/Robot32lib/LLMServerList/LLMServerList.php";
-require __DIR__."/vendor/Robot32lib/GPTlib/GPTlib.php";
-require __DIR__."/vendor/Robot32lib/ULogger/ULogger.php";
+require __DIR__."/vendor/autoload.php";
+
 use Robot32lib\LLMServerList\LLMServerList;
 use Robot32lib\GPTlib\GPTlib;
 use Robot32lib\ULogger\ULogger;

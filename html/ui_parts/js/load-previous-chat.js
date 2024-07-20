@@ -40,8 +40,8 @@ async function load_chat_part(id){
         img_src = await decryptText(img_dt,ClientSecretKey);
     }
 
-    console.log("here");
-    console.log(num,img_src,dat);
+    //console.log("here");
+    //console.log(num,img_src,dat);
 
     return restore_interaction(num,img_src,dat);
 

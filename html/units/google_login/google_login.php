@@ -1,5 +1,4 @@
 <?php
-
 include __DIR__."/settings.php";
 
 function generateRandomString($length = 32) {
@@ -7,11 +6,8 @@ function generateRandomString($length = 32) {
 }
 
 
-// Google OAuth 2.0 credentials
-$client_id = trim(file_get_contents("$BASE_DIR/keys/google_client_id.txt"));
-$client_secret = trim(file_get_contents("$BASE_DIR/keys/google_client_secret.txt"));    
-$redirect_uri = trim(file_get_contents("$BASE_DIR/keys/google_redirect_uri.txt")); 
-//$redirect_uri = 'http://localhost:8000/google_login.php';
+
+//$REDIRECT_URI = 'http://localhost:8000/google_login.php';
 
 // Google OAuth 2.0 endpoints
 $auth_url = 'https://accounts.google.com/o/oauth2/auth';
@@ -21,8 +17,8 @@ $userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo';
 // Step 1: Redirect to Google's authorization page
 if (!isset($_GET['code'])) {
     $params = array(
-        'client_id' => $client_id,
-        'redirect_uri' => $redirect_uri,
+        'client_id' => $CLIENT_ID,
+        'redirect_uri' => $REDIRECT_URI,
         'response_type' => 'code',
         'scope' => 'https://www.googleapis.com/auth/userinfo.email',
         'access_type' => 'online'
@@ -30,11 +26,7 @@ if (!isset($_GET['code'])) {
     
     $auth_link = $auth_url . '?' . http_build_query($params);
     header('Location: ' . $auth_link);
-    
-    
-    //echo ('Location: ' . $auth_link);
-    
-    exit;
+    exit();
 }
 
 // Step 2: Exchange authorization code for access token
@@ -46,9 +38,9 @@ if (isset($_GET['code'])) {
     curl_setopt($curl, CURLOPT_POST, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query([
         'code' => $code,
-        'client_id' => $client_id,
-        'client_secret' => $client_secret,
-        'redirect_uri' => $redirect_uri,
+        'client_id' => $CLIENT_ID,
+        'client_secret' => $CLIENT_SECRET,
+        'redirect_uri' => $REDIRECT_URI,
         'grant_type' => 'authorization_code'
     ]));
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);

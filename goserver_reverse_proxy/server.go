@@ -40,13 +40,9 @@ var imageUSRLimiter *RateLimiter;  // Limit for images for logged in users
 var imagePAYLimiter *RateLimiter;  // Limit for images for paying
 
 var loginLimiter *RateLimiter;     // Limit for google and login 
-
 var code498Limiter  *RateLimiter;  //returns code 498
 
 func main() {
-
-
-
 	// Parse the URL of the Apache server
 	//                                reqminute|reqhour|reqday|paralconn|   bytesmin| byteshour|  bytesday
     unLimiter =        NewRateLimiter(-1,    -1,     -1,    -1,       -1,         -1,        -1,        -1)

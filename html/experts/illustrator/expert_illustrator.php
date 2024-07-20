@@ -1,14 +1,11 @@
 <?php
 require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
-include __DIR__."/vendor/Robot32lib/ImageSource/ImageSource.php";
+require __DIR__."/vendor/autoload.php";
 use Robot32lib\ImageSource\ImageSource; 
-
-
 
 $use_falai = true;
 $falai_error = false;
-
 $content = $_REQUEST["content"];
 
 if(isset($_REQUEST["prerendered"]))$use_falai = false;
@@ -26,8 +23,8 @@ if($use_falai){
     ));
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15); 
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2); 
+    curl_setopt($ch, CURLOPT_TIMEOUT, 2);
 
     $result = curl_exec($ch);
     curl_close($ch);
@@ -43,27 +40,32 @@ if($use_falai){
 if(!$use_falai || $falai_error){
     if(class_exists("Robot32lib\\ImageSource\\ImageSource")){
         $is = new ImageSource(); 
-        if(strpos($content,"robot")!==false)
+        if(strpos($content,"robot")!==false){
             $dat=$is->getRandomPicture(["robot"]);
-        else if(strpos($content,"PHP")!==false)
+        }
+        else if(strpos($content,"PHP")!==false){
             $dat=$is->getRandomPicture(["PHP"]);
-        else if(strpos($content,"golang")!==false)
-            $dat=$is->getRandomPicture(["golang"]);       
-        else if(strpos($content,"javascript")!==false)
+        }
+        else if(strpos($content,"golang")!==false){
+            $dat=$is->getRandomPicture(["golang"]);
+        }       
+        else if(strpos($content,"javascript")!==false){
             $dat=$is->getRandomPicture(["javascript"]);
-        else if(strpos($content,"electronics")!==false)
+        }
+        else if(strpos($content,"electronics")!==false){
             $dat=$is->getRandomPicture(["electronics"]);
-        else if(strpos($content,"joke")!==false)
+        }
+        else if(strpos($content,"joke")!==false){
             $dat=$is->getRandomPicture(["joke"]);
-        else if(strpos($content,"microcontroller")!==false)
+        }
+        else if(strpos($content,"microcontroller")!==false){
             $dat=$is->getRandomPicture(["microcontroller"]);
+        }
         else $dat=$is->getRandomPicture(["general"]);
 
         header("Prerendered-Image:1");
     }   
 }
-
-
 
 $md5 = md5($dat);
 $time = str_replace(".","_",microtime(true));
@@ -71,7 +73,6 @@ $time = str_replace(".","_",microtime(true));
 //so in the future the reverse proxy could save the image instead
 header("Return-Image:".base64_encode($dat));
 header("Return-Image-Name:".base64_encode($md5."_".$time));
-
 
 $fname = "$IMAGES_DIR/$md5"."_"."$time.jpg";
 

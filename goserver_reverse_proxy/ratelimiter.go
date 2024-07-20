@@ -24,8 +24,7 @@ type RateLimiter struct {
 	bytesDayCounts   map[string]int64
 	lastDayResetTimes   map[string]time.Time
 	
-	
-	
+
 	activeSessions  map[string]int
 	
 	maxRequestsPerMinute int
@@ -56,7 +55,6 @@ func NewRateLimiter(nr,maxRequestsPerMinute, maxRequestsPerHour, maxRequestsPerD
 		requestDayCounts:   make(map[string]int),
 		bytesDayCounts:   make(map[string]int64),		
 		lastDayResetTimes:   make(map[string]time.Time),
-		
 		
 		
 		activeSessions:  make(map[string]int),
@@ -144,7 +142,6 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())} ) 
 	}
 	
 	
-	
 	// Check if the iporid has exceeded the byte limit for minute
 	if rl.maxBytesPerMinute!=-1 && rl.bytesMinuteCounts[iporid] >= rl.maxBytesPerMinute {
 		return false, rl.responseCode, "Characters per minute exceeded, wait "+strconv.Itoa(60-int((now.Sub(rl.lastMinuteResetTimes[iporid]).Seconds())))+" seconds!" 
@@ -161,7 +158,6 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())} ) 
 	}
 	
 	
-
 	// Increment counters
 	rl.requestMinuteCounts[iporid]++
 	rl.requestHourCounts[iporid]++
@@ -174,10 +170,7 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())} ) 
 	}
 	w.AddReleaser(releasefunc)
 	//w.releasers = append(w.releasers, releasefunc)
-	
-	
 	//fmt.Println("Active sessions for "+iporid+" is now "+strconv.Itoa(rl.activeSessions[iporid])) 
-	
 
 	return true, 200, ""
 }

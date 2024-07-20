@@ -3,8 +3,6 @@
     Uses ratelimiter to limit usage.
     Can use cache.
 */
-
-
 package main
 
 import (
@@ -26,7 +24,7 @@ type MiddleSitterTransport struct {
 	originalTransport http.RoundTripper
 }
 
-// Lets us observe (Observable) data (Read) flowing through, and hadle the stream close (Closer) 
+// Lets us observe (Observable) data (Read) that is flowing through, and hadle the stream close (Closer) 
 type ObservableReadCloser struct {
     io.ReadCloser // Embed the original ReadCloser.
     dataObserved   []byte
@@ -40,9 +38,6 @@ type ObservableReadCloser struct {
     releasers []func()
     streamObservers []func([]byte,int64)
 }
-
-
-
 
 
 /*
@@ -152,9 +147,6 @@ func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
     return errorResponse, nil
     
 }
-
-
-
 
 
 /*
