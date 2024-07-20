@@ -36,19 +36,22 @@ $ai->setHistory($_REQUEST["history"] ?? null);
 
 $options = [
     "temperature"=> 1,
-    "max_tokens"=> 8024,
+    "max_tokens"=> 8000,
     "top_p"=> 1,
     "stream"=> true,
     "stop"=> null
     ];
 $content = $_REQUEST["content"];
 $model = $_REQUEST["model"];
-
+//$ai->setPartial("Sure, I pick number 11 ");
 $r = $ai->chat($content,$model,$options,function($txt,$data){
     if(!headers_sent())header("openrouter-id: ".$data['id']);
     
     //print_r($data);
-    
+   // error_log(connection_aborted());
+
+   // error_log($txt);
+
     echo $txt;
     @flush(); @ob_flush(); @ob_clean();
 }); 

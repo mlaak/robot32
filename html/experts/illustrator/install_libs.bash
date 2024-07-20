@@ -5,6 +5,7 @@
 # So yeah, we do just use bash scripts for installing some stuff here
 
 bash <(curl -s "https://raw.githubusercontent.com/mlaak/robot32lib/main/vendor/Robot32lib/Middleware/install.bash")
+bash <(curl -s "https://raw.githubusercontent.com/mlaak/robot32lib/main/vendor/Robot32lib/ImageSource/install.bash")
 
 
 
