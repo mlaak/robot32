@@ -42,17 +42,14 @@ type MiddleSitterTransport struct {
 *******************************************************************************/
 
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-// ********** PREPARATIONS ************************************
     usertype, iporid := GetUser(req) 
     context := NewRequestContext(iporid)
-
     orc := &ObservableReadCloser{ip:iporid}
     orc.request = req.URL.String()
 
-// **********  SELECT RATE LIMITERS BASED ON URL & USER *******
+
     rateLimiter,coLimiter := PathUserRateLimitersSelect(req.URL.Path,usertype)
 
-// **********  APPLY RATELIMITERS *****************************
     if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc,context);!allowed {       		
 			orc.ReleaseAll()
 			return MakeHttpErrorResponse(ecode,ertext)
@@ -62,24 +59,24 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 			return MakeHttpErrorResponse(ecode,TR("For all IP (non logged in) users combined (consider logging in):",context)+ertext);  
     }
 
-// *********** FORWARD REQUEST TO APACHE ***********************
+    // forward request to apache
 	resp, err := t.originalTransport.RoundTrip(req)
 	if err != nil {
 	    orc.ReleaseAll()
 		return nil, err
 	}
 
-// *************** METER BYTES? ********************************
-	_, meterBytes := resp.Header["Meter-Bytes"];
-	if meterBytes {
+
+	_, shouldWeMeterBytes := resp.Header["Meter-Bytes"];
+	if shouldWeMeterBytes {
 	    rateLimiter.Addbytes(iporid,req.ContentLength) //add request bytes. Can this be tricked by the user?
 	    meterfunc := func(data []byte, n int64){
 	       rateLimiter.Addbytes(iporid,n) //add downloaded bytes
 	    }
 	    orc.AddStreamObserver(meterfunc)
 	}
+    
 
-// ************** SEND REPLY BACK TO CLIENT ********************
 	orc.ReadCloser = resp.Body
 	resp.Body = orc
 	analyzeResponse(resp)
