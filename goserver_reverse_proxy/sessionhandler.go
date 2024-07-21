@@ -16,27 +16,6 @@ import (
     "path/filepath"
 )
 
-var hexRegex = regexp.MustCompile("^[0-9a-fA-F]+$");
-
-func IsHex(s string) bool {
-	return hexRegex.MatchString(s)
-}
-
-func getCookieValue(r *http.Request, cookieName string) string {
-
-    /*cookies := r.Cookies()
-    for _, cookie := range cookies {
-        fmt.Println("Cookie name:", cookie.Name)
-        fmt.Println("Cookie value:", cookie.Value)
-    }*/
-
-
-	cookie, err := r.Cookie(cookieName)
-	if err != nil {
-		return ""
-	}
-	return cookie.Value
-}
 
 const (
     UserTypeUnverified = "unverified_ip"
@@ -50,11 +29,7 @@ func GetUser(req *http.Request)(string,string){
     c := getCookieValue(req,"r_ression_id")
     fmt.Println("Cookie is",c)
     
-    if !IsHex(c){
-        c = "";
-    }
-    
-    if c == ""{
+    if c == "" || !IsHex(c){
         return UserTypeUnverified,ip
     }
     
@@ -90,11 +65,21 @@ func GetUser(req *http.Request)(string,string){
 	    } else {
 	        return UserTypeUnverified,ip
 	    }
-	    //fmt.Println("!!!!!!!!!",fileContents)
-	    //return "1","1"
-		
 	} else {
 	    return UserTypeUnverified,ip
 	}
        
+}
+
+func getCookieValue(r *http.Request, cookieName string) string {
+	cookie, err := r.Cookie(cookieName)
+	if err != nil {
+		return ""
+	}
+	return cookie.Value
+}
+
+var hexRegex = regexp.MustCompile("^[0-9a-fA-F]+$");
+func IsHex(s string) bool {
+	return hexRegex.MatchString(s)
 }

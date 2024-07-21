@@ -1,13 +1,22 @@
-/*
+/***********************************************************
+  CLIENT            MIDLESITTER
+  ____                                  APACHE WEB
+ /  O \_            //////                SERVER
+(     __\          / /  O \             ////
+ \____/ PLA PLAPLA (     __\          //   0\___
+   ||               \____/ PLA PLAPLA (   )   __\
+                      ||               \ _____/
+                                         | |
     Sits in the middle of the client and the apache server
+    (in both directions)
     Uses ratelimiter to limit usage.
-    Can use cache.
-*/
+    Could use cache, loadbalancing etc... (just implement it)
+***********************************************************/
 package main
 
 import (
 	"fmt"
-	"io"
+//	"io"
 //	"log"
 	"net/http"
 //	"net/http/httputil"
@@ -24,88 +33,80 @@ type MiddleSitterTransport struct {
 	originalTransport http.RoundTripper
 }
 
-// Lets us observe (Observable) data (Read) that is flowing through, and hadle the stream close (Closer) 
-type ObservableReadCloser struct {
-    io.ReadCloser // Embed the original ReadCloser.
-    dataObserved   []byte
-    
-    //Here we also keep our notes about the request and response
-    request string 
-    ip string
-    openrouterId string
-    
-    //Functions that need to be executed upon stream close. Used for example by ratelimiter
-    releasers []func()
-    streamObservers []func([]byte,int64)
-}
-
-
-/*
+/**************************** ROUNDTRIP ***************************************
     Here we actually facilitate the middlesitting.
-    We get request from client, forwards it to apache, get response and forward (backward?) it to the client.
-    Note that we get the body stream and forward it back to client (meaning the body data might be still flowing, the headers we have though).
-*/
-func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+    We get request from client, forwards it to apache, get response and forward
+    (backward?) it to the client. Note that we get the body -stream- and forward
+    it back to client (meaning the body data might be still flowing).  
+    The headers we have though.
+*******************************************************************************/
 
+func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+// ********** PREPARATIONS ************************************
     usertype, iporid := GetUser(req) 
-    
-    //ip := strings.Split(req.RemoteAddr, ":")[0]
-    
+    context := NewRequestContext(iporid)
+
     orc := &ObservableReadCloser{ip:iporid}
     orc.request = req.URL.String()
-    
-    // **********  Select rate limiters based on url and user
-    
+
+// **********  SELECT RATE LIMITERS BASED ON URL & USER *******
     rateLimiter,coLimiter := PathUserRateLimitersSelect(req.URL.Path,usertype)
-    fmt.Println("")
-    fmt.Println("Path",       req.URL.Path)
-    fmt.Println("Usertype",   usertype)
-    fmt.Println("iporid",     iporid)    
-    fmt.Println("Limiter nr", rateLimiter.nr)
-       
-       
-    // **********   Aplly ratelimiter ********************************
-    if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc);!allowed {       		
+
+// **********  APPLY RATELIMITERS *****************************
+    if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc,context);!allowed {       		
 			orc.ReleaseAll()
 			return MakeHttpErrorResponse(ecode,ertext)
     }
-    if allowed, ecode, ertext := coLimiter.Allow("ALLTOGETHER",orc);!allowed{
+    if allowed, ecode, ertext := coLimiter.Allow("ALLTOGETHER",orc,context);!allowed{
 			orc.ReleaseAll()
-			return MakeHttpErrorResponse(ecode,"For all IP (non logged in) users combined (consider logging in):"+ertext);  
+			return MakeHttpErrorResponse(ecode,TR("For all IP (non logged in) users combined (consider logging in):",context)+ertext);  
     }
-    
-   
-    
-	// *************** Send the request to the Apache server *********
+
+// *********** FORWARD REQUEST TO APACHE ***********************
 	resp, err := t.originalTransport.RoundTrip(req)
 	if err != nil {
 	    orc.ReleaseAll()
 		return nil, err
 	}
 
-	// *************** Meter bytes? *********************	
+// *************** METER BYTES? ********************************
 	_, meterBytes := resp.Header["Meter-Bytes"];
 	if meterBytes {
-	    //fmt.Println("Metering bytes")
-	    rateLimiter.Addbytes(iporid,req.ContentLength) //can this be tricked by the user?
+	    rateLimiter.Addbytes(iporid,req.ContentLength) //add request bytes. Can this be tricked by the user?
 	    meterfunc := func(data []byte, n int64){
-	       rateLimiter.Addbytes(iporid,n)
+	       rateLimiter.Addbytes(iporid,n) //add downloaded bytes
 	    }
 	    orc.AddStreamObserver(meterfunc)
 	}
-	
-	// *************** Send reply back to client *********************
-	
-	
+
+// ************** SEND REPLY BACK TO CLIENT ********************
 	orc.ReadCloser = resp.Body
 	resp.Body = orc
 	analyzeResponse(resp)
-    
 	return resp, nil
-	
-	// *** Stuff useful for debugging ***
-	
-	/*fmt.Println(req.URL.String());
+} 
+
+
+func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
+    errorResponse :=  &http.Response{
+        StatusCode: status,//429,
+        Status:     err,
+        Body:       http.NoBody,
+        Header:     make(http.Header),
+    }    
+    body := []byte(err)
+    errorResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
+    errorResponse.ContentLength = int64(len(body))
+    errorResponse.Header.Set("Error-reason", err)    
+    return errorResponse, nil    
+}
+
+
+
+
+// *** Stuff useful for debugging ***
+    func debugPrint(req *http.Request,resp *http.Response, orc *ObservableReadCloser){
+	fmt.Println(req.URL.String());
     fmt.Println("Client headers:")
     for key, values := range req.Header {
         fmt.Println("  "+key, values)
@@ -115,84 +116,5 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
     for key, values := range resp.Header {
         if(key=="Openrouter-Id"){ orc.openrouterId = values[0]; }
         fmt.Println("  "+key, values)
-    }*/
-	
-	// Clone the response body
-	/*bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	resp.Body.Close()
-
-	// Create a new response with the cloned body
-	resp.Body = io.NopCloser(io.NewReader(bodyBytes))
-	*/
-	
-    return resp, nil
-
-} 
-
-func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
-    errorResponse :=  &http.Response{
-        StatusCode: status,//429,
-        Status:     err,
-        Body:       http.NoBody,
-        Header:     make(http.Header),
-    }    
-    
-    body := []byte(err)
-    errorResponse.Body = ioutil.NopCloser(bytes.NewBuffer(body))
-    errorResponse.ContentLength = int64(len(body))
-    errorResponse.Header.Set("Error-reason", err)    
-    return errorResponse, nil
-    
-}
-
-
-/*
-    http body flows through it
-*/
-func (w *ObservableReadCloser) Read(p []byte) (int, error) {
-    n, err := w.ReadCloser.Read(p) // Call the original Read method.
-    
-    for _, streamObserver := range w.streamObservers {
-        streamObserver(p,int64(n))
-    }
-    
-    if n<1000 {
-        //fmt.Println(p[:n])
-    }
-    w.dataObserved = append(w.dataObserved, p[:n]...)
-    return n, err
-}
-
-
-/*
-    When stream is closed
-    
-    NB. Might not be called if server error?
-*/    
-func (w *ObservableReadCloser) Close() error {
-     fmt.Println("CLOSING!")
-     w.ReleaseAll()
-    return w.ReadCloser.Close() // Call the original Close method.
-}
-
-
-func (w *ObservableReadCloser) ReleaseAll() {
-    for _, releaser := range w.releasers {
-        releaser()
     }
 }
-
-func (w *ObservableReadCloser) AddReleaser(releasefunc func()) {
-    w.releasers = append(w.releasers, releasefunc)
-}
-
-func (w *ObservableReadCloser) AddStreamObserver(observerfunc func([]byte,int64 )){
-    w.streamObservers = append(w.streamObservers, observerfunc)
-}
-
-
-
-

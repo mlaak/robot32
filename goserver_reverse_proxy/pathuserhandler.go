@@ -13,52 +13,37 @@ import (
 //	"io/ioutil"
 )
 
-/*const (
-    UserTypeUnverified = "unverified_ip"
-    UserTypeCaptchad = "captchad_ip"
-    UserTypeGithub = "github"
-    UserTypeGoogle = "google"   
-)*/
-
 func PathUserRateLimitersSelect(path string, usertype string) (*RateLimiter,*RateLimiter){
-    //p := req.URL.Path
-     p := path
- 
-    //fmt.Println("!!!req URL",p)
-    
-    
-    // /experts/general
-    
-    if strings.HasPrefix(p,"/experts/") {
-        if usertype == UserTypeUnverified {
-            return code498Limiter, code498Limiter
-        }
-        if usertype == UserTypeCaptchad {
-            return expertIPLimiter, expertAIPLimiter    
-        }
-        if usertype == UserTypeGithub || usertype == UserTypeGoogle {
-            return expertUSRLimiter, unLimiter    
-        }
-        return expertIPLimiter, expertAIPLimiter
+    p := path
+    if strings.HasPrefix(p,"/experts/") { 
+        return ExpertsLimitersSelect(path,usertype); 
         
     } else if strings.HasPrefix(p,"/recieved_images/") || strings.HasPrefix(p,"/welcome2.jpg") {
-        if usertype == UserTypeUnverified {
-            return imageIPLimiter, unLimiter
-        }
-        if usertype == UserTypeCaptchad {
-            return imageIPLimiter, unLimiter    
-        }
-        if usertype == UserTypeGithub || usertype == UserTypeGoogle {
-            return imageUSRLimiter, unLimiter    
-        }
-        return imageIPLimiter, unLimiter
-        
+       return ImagesLimitersSelect(path,usertype); 
+
     } else if strings.HasPrefix(p,"/units/github_login") || strings.HasPrefix(p,"/units/google_login"){
-        return loginLimiter, unLimiter
+        return loginLimiter,    unLimiter
+
     } else {
         return staticIPLimiter, unLimiter
     }
- 
 }
 
-
+func ImagesLimitersSelect(path string, usertype string) (*RateLimiter,*RateLimiter){
+    switch usertype{
+        case UserTypeUnverified: return imageIPLimiter,  unLimiter
+        case UserTypeCaptchad:   return imageIPLimiter,  unLimiter
+        case UserTypeGithub:     return imageUSRLimiter, unLimiter  
+        case UserTypeGoogle:     return imageUSRLimiter, unLimiter
+        default:                 return imageIPLimiter,  unLimiter
+    }
+}
+func ExpertsLimitersSelect(path string, usertype string) (*RateLimiter,*RateLimiter){
+    switch usertype{
+        case UserTypeUnverified: return code498Limiter,  code498Limiter
+        case UserTypeCaptchad:   return expertIPLimiter, expertAIPLimiter
+        case UserTypeGithub:     return expertUSRLimiter,unLimiter
+        case UserTypeGoogle:     return expertUSRLimiter,unLimiter    
+        default:                 return expertIPLimiter, expertAIPLimiter
+    }
+}

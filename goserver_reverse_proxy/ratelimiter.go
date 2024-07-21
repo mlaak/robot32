@@ -1,3 +1,14 @@
+/***********************************************************
+   ______
+  /      \     IS USED TO LIMIT USERS 
+ /  STOP  \			* NR OF REQUESTS
+ \        /			* PARALLEL REQUESTS
+  \______/			* AMOUNT OF DATA
+     ||		  BASED ON
+     ||				* MINUTE, HOUR, DAY
+     ||
+***********************************************************/
+
 package main
 
 import (
@@ -10,178 +21,174 @@ import (
 )
 
 type RateLimiter struct {
+	minuteLimit *Rate
+	hourLimit *Rate
+	dayLimit *Rate
+
+	activeConnections  map[string]int
+	maxParallelRequests  int
+
 	mu              sync.Mutex
 	nr int
-	requestMinuteCounts   map[string]int
-	bytesMinuteCounts   map[string]int64
-	lastMinuteResetTimes   map[string]time.Time
-	
-	requestHourCounts   map[string]int
-	bytesHourCounts   map[string]int64
-	lastHourResetTimes   map[string]time.Time
-	
-	requestDayCounts   map[string]int
-	bytesDayCounts   map[string]int64
-	lastDayResetTimes   map[string]time.Time
-	
-
-	activeSessions  map[string]int
-	
-	maxRequestsPerMinute int
-	maxRequestsPerHour   int
-	maxRequestsPerDay   int
-	maxParallelRequests  int
-	
-	maxBytesPerMinute int64
-	maxBytesPerHour   int64
-	maxBytesPerDay   int64
-	
 	responseCode int
-	
-	
 }
 
 func NewRateLimiter(nr,maxRequestsPerMinute, maxRequestsPerHour, maxRequestsPerDay,  maxParallelRequests int, maxBytesPerMinute int64, maxBytesPerHour int64, maxBytesPerDay int64) *RateLimiter {
 	return &RateLimiter{
-	    nr:nr,
-		requestMinuteCounts:   make(map[string]int),
-		bytesMinuteCounts:   make(map[string]int64),
-		lastMinuteResetTimes:   make(map[string]time.Time),
-		
-		requestHourCounts:   make(map[string]int),
-		bytesHourCounts:   make(map[string]int64),
-		lastHourResetTimes:   make(map[string]time.Time),
-		
-		requestDayCounts:   make(map[string]int),
-		bytesDayCounts:   make(map[string]int64),		
-		lastDayResetTimes:   make(map[string]time.Time),
-		
-		
-		activeSessions:  make(map[string]int),
-		
-		maxRequestsPerMinute: maxRequestsPerMinute,
-		maxRequestsPerHour: maxRequestsPerHour,
-		maxRequestsPerDay: maxRequestsPerDay,
-	
+		minuteLimit:NewRate(time.Minute,  maxRequestsPerMinute, maxBytesPerMinute),
+		hourLimit:  NewRate(time.Hour,    maxRequestsPerHour,   maxBytesPerHour),
+		dayLimit:   NewRate(time.Hour*24, maxRequestsPerDay,    maxBytesPerDay),
+
+		activeConnections:  make(map[string]int),
 		maxParallelRequests:  maxParallelRequests,
 		
-		maxBytesPerMinute: maxBytesPerMinute,
-		maxBytesPerHour: maxBytesPerHour,
-		maxBytesPerDay: maxBytesPerDay,
-	
+		nr:nr,
 		responseCode: 429,
-		
 	}
 }
 
-func (rl *RateLimiter) Addbytes(iporid string, tokenCount int64){
-    rl.mu.Lock()
-    defer rl.mu.Unlock()
-    
-    rl.bytesMinuteCounts[iporid]+=tokenCount
-	rl.bytesHourCounts[iporid]+=tokenCount
-	rl.bytesDayCounts[iporid]+=tokenCount
-    
-    //fmt.Println("!!!!!!!!!Metering bytes",iporid,rl.bytesMinuteCounts[iporid])
-    
-    
-}
 
-func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())} ) (bool,int,string) {
+
+func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},context *RequestContext) (bool,int,string) {
+// *********** PREPARATIONS ***********************************
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
-
 	now := time.Now()
 
-	// Reset counter if a minute has passed
-	if lastReset, exists := rl.lastMinuteResetTimes[iporid]; !exists || now.Sub(lastReset) > time.Minute {
-		rl.activeSessions[iporid] = 0
-		rl.requestMinuteCounts[iporid] = 0
-		rl.bytesMinuteCounts[iporid] = 0
-		rl.lastMinuteResetTimes[iporid] = now
+// *********** RESET LIMITS ***********************************
+	if rl.minuteLimit.ResetIfTime(iporid,now){
+		//in case we have miscounted active connection (edge cases when we dont detect disconnect)
+		//lets reset that also - otherwise we get a system stop for the user
+		rl.activeConnections[iporid] = 0 
 	}
+	rl.hourLimit.ResetIfTime(iporid,now);
+	rl.dayLimit.ResetIfTime(iporid,now);
 	
-	if lastReset, exists := rl.lastHourResetTimes[iporid]; !exists || now.Sub(lastReset) > time.Hour {
-		rl.requestHourCounts[iporid] = 0
-		rl.bytesHourCounts[iporid] = 0
-		rl.lastHourResetTimes[iporid] = now
-	}
-	
-	
-	
-	if lastReset, exists := rl.lastDayResetTimes[iporid]; !exists || now.Sub(lastReset) > (time.Hour*24) {
-		rl.requestDayCounts[iporid] = 0
-		rl.bytesDayCounts[iporid] = 0
-		rl.lastDayResetTimes[iporid] = now
-	}
-	
-	
-	//we have a zero limiter, the request is clearlu blocked
-	if rl.maxRequestsPerMinute == 0 || rl.maxRequestsPerHour == 0 || rl.maxRequestsPerDay == 0{
-	    return false, rl.responseCode, "Not allowed (maybe you need to login or prove you are not a robot or something)."
-	}
-	
-	// Check if the iporid has exceeded the rate limit for minute
-	if rl.maxRequestsPerMinute!=-1 && rl.requestMinuteCounts[iporid] >= rl.maxRequestsPerMinute {
-		return false, rl.responseCode, "Requests per minute exceeded, wait  "+strconv.Itoa(60-int((now.Sub(rl.lastMinuteResetTimes[iporid]).Seconds())))+" seconds!"
+// ********** CHECK IF ACCESS IF FULLY BLOCKED ****************
+	if(rl.minuteLimit.maxRequests == 0 || rl.hourLimit.maxRequests == 0 || rl.dayLimit.maxRequests == 0){
+		txt:=TR("Not allowed (maybe you need to login or prove you are not a robot or something).",context)
+		return false, rl.responseCode, txt
 	}
 
-	// Check if the iporid has exceeded the rate limit for hour
-	if rl.maxRequestsPerHour!=-1 && rl.requestHourCounts[iporid] >= rl.maxRequestsPerHour {
-		return false, rl.responseCode, "Requests per hour exceeded!"
+// ********** CHECK REQUEST LIMITS  ***************************
+	if(rl.minuteLimit.IsRequestLimitBroken(iporid)){
+		txt:=TR("Requests per minute exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
 	}
-	
-	// Check if the iporid has exceeded the rate limit for day
-	if rl.maxRequestsPerDay!=-1 && rl.requestDayCounts[iporid] >= rl.maxRequestsPerDay {
-		return false, rl.responseCode, "Requests per day exceeded!"
+	if(rl.hourLimit.IsRequestLimitBroken(iporid)){
+		txt:=TR("Requests per hour exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
 	}
-
-	// Check if the iporid has exceeded the parallel request limit
-	if rl.maxParallelRequests!=-1 && rl.activeSessions[iporid] >= rl.maxParallelRequests {
-		return false, rl.responseCode, "Max parallel requests exceeded!"
-	}
-	
-	
-	// Check if the iporid has exceeded the byte limit for minute
-	if rl.maxBytesPerMinute!=-1 && rl.bytesMinuteCounts[iporid] >= rl.maxBytesPerMinute {
-		return false, rl.responseCode, "Characters per minute exceeded, wait "+strconv.Itoa(60-int((now.Sub(rl.lastMinuteResetTimes[iporid]).Seconds())))+" seconds!" 
+	if(rl.dayLimit.IsRequestLimitBroken(iporid)){
+		txt:=TR("Requests per day exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
 	}
 
-	// Check if the iporid has exceeded the byte limit for hour
-	if rl.maxBytesPerHour!=-1 && rl.bytesHourCounts[iporid] >= rl.maxBytesPerHour {
-		return false, rl.responseCode, "Characters per hour exceeded!"
+// ********** CHECK DATA FLOW LIMITS  *************************
+	if(rl.minuteLimit.IsBytesLimitBroken(iporid)){
+		txt:=TR("Characters per minute exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
 	}
-	
-	// Check if the iporid has exceeded the byte limit for day
-	if rl.maxBytesPerDay!=-1 && rl.bytesDayCounts[iporid] >= rl.maxBytesPerDay {
-		return false, rl.responseCode, "Characters per day exceeded!"
+	if(rl.hourLimit.IsBytesLimitBroken(iporid)){
+		txt:=TR("Characters per hour exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
 	}
+	if(rl.dayLimit.IsBytesLimitBroken(iporid)){
+		txt:=TR("Characters per day exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
+		return false, rl.responseCode, txt;
+	}
+
+// ** INCREASE COUNTERS AND SET TRIGGER FOR CONNECTION CLOSE **
+	rl.minuteLimit.AddRequest(iporid);
+	rl.hourLimit.AddRequest(iporid);
+	rl.dayLimit.AddRequest(iporid);
 	
-	
-	// Increment counters
-	rl.requestMinuteCounts[iporid]++
-	rl.requestHourCounts[iporid]++
-	rl.requestDayCounts[iporid]++
-	
-	rl.activeSessions[iporid]++
-	
-	releasefunc := func(){
-	    rl.Release(iporid)
+	rl.activeConnections[iporid]++
+	releasefunc := func(){ //we need to track the connection close
+		rl.mu.Lock()
+		defer rl.mu.Unlock()
+		if rl.activeConnections[iporid] > 0 {
+			rl.activeConnections[iporid]--
+		}
 	}
 	w.AddReleaser(releasefunc)
-	//w.releasers = append(w.releasers, releasefunc)
-	//fmt.Println("Active sessions for "+iporid+" is now "+strconv.Itoa(rl.activeSessions[iporid])) 
 
+// ********** RETURN SUCCESS **********************************
 	return true, 200, ""
 }
 
-func (rl *RateLimiter) Release(iporid string) {
-	rl.mu.Lock()
-	defer rl.mu.Unlock()
 
-	if rl.activeSessions[iporid] > 0 {
-	    rl.activeSessions[iporid]--
-	    //fmt.Println(iporid+" closed count is "+strconv.Itoa(rl.activeSessions[iporid]))
+func (rl *RateLimiter) Addbytes(iporid string, bytesCount int64){
+    rl.mu.Lock()
+    defer rl.mu.Unlock()
+
+	rl.minuteLimit.Addbytes(iporid,bytesCount);
+	rl.hourLimit.Addbytes(iporid,bytesCount);
+	rl.dayLimit.Addbytes(iporid,bytesCount);    
+}
+
+
+
+type Rate struct {
+	requestCounts  map[string]int
+	bytesCounts   map[string]int64
+	lastResetTimes   map[string]time.Time
+
+	maxRequests int	
+	maxBytes int64
+	period time.Duration
+}
+
+func NewRate(period time.Duration, maxRequests int,maxBytes int64) *Rate {
+	return &Rate{
+		requestCounts:   make(map[string]int),
+		bytesCounts:   make(map[string]int64),
+		lastResetTimes:   make(map[string]time.Time),
+
+		maxRequests: maxRequests,
+		maxBytes: maxBytes,
+		period: period,
 	}
 }
 
+func (r *Rate) Addbytes(user string,count int64){
+	r.bytesCounts[user]+=count;
+}
+
+func (r *Rate) AddRequest(user string){
+	r.requestCounts[user]+=1;
+}
+
+func (r *Rate) IsRequestLimitBroken(user string)bool{
+	if(r.maxRequests!=-1 && r.requestCounts[user]>r.maxRequests){
+		return true
+	} else {
+		return false
+	}
+}
+
+func (r *Rate) GetWaitTimeStr(user string,now time.Time) string{
+	//TODO: make it also talk in minutes hours
+	secs := r.period.Seconds()-now.Sub(r.lastResetTimes[user]).Seconds();
+	return strconv.Itoa(int(secs))+"s";
+}
+
+
+func (r *Rate) IsBytesLimitBroken(user string) bool{
+	if(r.maxBytes!=-1 && r.bytesCounts[user]>r.maxBytes){
+		return true
+	} else {
+		return false
+	}
+}
+
+
+func (r *Rate) ResetIfTime(iporid string, now time.Time) bool{
+	if lastReset, exists := r.lastResetTimes[iporid]; !exists || now.Sub(lastReset) > r.period {
+		r.requestCounts[iporid] = 0
+		r.bytesCounts[iporid] = 0
+		r.lastResetTimes[iporid] = now
+		return true;
+	}
+	return false;
+}
