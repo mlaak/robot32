@@ -33,41 +33,65 @@ import (
 
 
 
+type IObservableReadCloser interface {
+    AddOnCloseFunc(onCloseFunc func())
+    AddStreamObserver(observerFunc func([]byte,int64 ))
+    SetReadCloser(ReadCloser io.ReadCloser)
+    SetRequestStr(rstr string)
+
+    CallAllOnCloseFuncs()
+    Close() error
+    Read(p []byte) (int, error)
+}
+
 // Lets us observe (Observable) data (Read) that is flowing through, and hadle the stream close (Closer) 
 type ObservableReadCloser struct {
-    io.ReadCloser // Embed the original ReadCloser.
+    ReadCloser io.ReadCloser // Embed the original ReadCloser.
+    
     dataObserved   []byte
-    
-    //Here we also keep our notes about the request and response
-    request string 
-    ip string
-    openrouterId string
-    
+
+    rstr string
     //Functions that need to be executed upon stream close. Used for example by ratelimiter
-    releasers []func()
+    onCloseFuncs []func()
     streamObservers []func([]byte,int64)
+}
+
+func NewObservableReadCloser() (IObservableReadCloser){
+    return &ObservableReadCloser{}
 }
 
 /*
     Registers a function that is called when stream closes
 */
-func (w *ObservableReadCloser) AddReleaser(releasefunc func()) {
-    w.releasers = append(w.releasers, releasefunc)
+func (w *ObservableReadCloser) AddOnCloseFunc(onCloseFunc func()) {
+    w.onCloseFuncs = append(w.onCloseFuncs, onCloseFunc)
+}
+
+
+func (w *ObservableReadCloser) SetReadCloser(ReadCloser io.ReadCloser){
+    w.ReadCloser = ReadCloser
+}
+
+func (w *ObservableReadCloser) SetRequestStr(rstr string) {
+    w.rstr = rstr
 }
 
 /*
     Registers a function that is called when chunk of data moves in stream
 */
-func (w *ObservableReadCloser) AddStreamObserver(observerfunc func([]byte,int64 )){
-    w.streamObservers = append(w.streamObservers, observerfunc)
+func (w *ObservableReadCloser) AddStreamObserver(observerFunc func([]byte,int64 )){
+    w.streamObservers = append(w.streamObservers, observerFunc)
 }
 
 /*
  Call all releaser functions
 */
-func (w *ObservableReadCloser) ReleaseAll() {
-    for _, releaser := range w.releasers {
-        releaser()
+func (w *ObservableReadCloser) CallAllOnCloseFuncs() {
+    for key, onCloseFunc := range w.onCloseFuncs {
+        if(onCloseFunc != nil){
+            onCloseFunc()
+        }
+        w.onCloseFuncs[key] = nil
     }
 }
 
@@ -77,7 +101,7 @@ func (w *ObservableReadCloser) ReleaseAll() {
 */    
 func (w *ObservableReadCloser) Close() error {
     //fmt.Println("CLOSING!")
-    w.ReleaseAll()
+    w.CallAllOnCloseFuncs()
    return w.ReadCloser.Close() // Call the original Close method.
 }
 

@@ -28,7 +28,8 @@ import (
 	"io/ioutil"
     "grp/situation"
     "grp/limits"
-    "grp/session"
+    . "grp/ratelimiter"  
+    "grp/usersession"
     . "grp/translator"
     
 )
@@ -36,6 +37,22 @@ import (
 // see function RoundTrip
 type MiddleSitterTransport struct {
 	OriginalTransport http.RoundTripper
+    GetUser func(*http.Request)(string,string) 
+    GetLimitersForPathAndUserType func(string,string) (IRateLimiter,IRateLimiter)
+    Observers IObservableReadCloser
+    RequestContext situation.IRequestContext
+
+}
+
+func NewMiddleSitterTransport(Original http.RoundTripper)(*MiddleSitterTransport){
+    t := &MiddleSitterTransport{
+	    OriginalTransport:Original,
+        GetUser: usersession.GetUser,
+        GetLimitersForPathAndUserType: limits.GetLimitersForPathAndUserType,
+        Observers: NewObservableReadCloser(),
+        RequestContext: situation.NewRequestContext(),
+    }
+    return t;
 }
 
 /**************************** ROUNDTRIP ***************************************
@@ -47,27 +64,38 @@ type MiddleSitterTransport struct {
 *******************************************************************************/
 
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-    usertype, iporid := session.GetUser(req) 
-    context := situation.NewRequestContext(iporid)
-    orc := &ObservableReadCloser{ip:iporid}
-    orc.request = req.URL.String()
+    usertype, iporid := t.GetUser(req) 
+
+    context := t.RequestContext
+    context.SetIporid(iporid)
+    
+    observers := t.Observers;
+    observers.SetRequestStr(req.URL.String())
 
 
-    rateLimiter,coLimiter := limits.GetLimitersForPathAndUserType(req.URL.Path,usertype)
+    rateLimiter,coLimiter := t.GetLimitersForPathAndUserType(req.URL.Path,usertype)
 
-    if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc,context);!allowed {       		
-			orc.ReleaseAll()
-			return MakeHttpErrorResponse(ecode,ertext)
+    if allowed, ecode, ertext := rateLimiter.Allow(iporid,context); allowed {       		
+        countDownOneConnectionFunc := rateLimiter.CountUpOneConnection(iporid);
+        observers.AddOnCloseFunc(countDownOneConnectionFunc)
+    } else {
+        observers.CallAllOnCloseFuncs()
+		return MakeHttpErrorResponse(ecode,ertext)
     }
-    if allowed, ecode, ertext := coLimiter.Allow("ALLTOGETHER",orc,context);!allowed{
-			orc.ReleaseAll()
-			return MakeHttpErrorResponse(ecode,TR("For all IP (non logged in) users combined (consider logging in):",context)+ertext);  
+
+    if allowed, ecode, ertext := coLimiter.Allow("ALLTOGETHER",context); allowed{
+        countDownOneConnectionFunc := coLimiter.CountUpOneConnection(iporid);
+        observers.AddOnCloseFunc(countDownOneConnectionFunc)  
+    } else {
+        observers.CallAllOnCloseFuncs()
+		return MakeHttpErrorResponse(ecode,TR("For all IP (non logged in) users combined (consider logging in):",context)+ertext);
     }
+
 
     // forward request to apache
 	resp, err := t.OriginalTransport.RoundTrip(req)
 	if err != nil {
-	    orc.ReleaseAll()
+	    observers.CallAllOnCloseFuncs()
 		return nil, err
 	}
 
@@ -78,12 +106,12 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 	    meterfunc := func(data []byte, n int64){
 	       rateLimiter.Addbytes(iporid,n) //add downloaded bytes
 	    }
-	    orc.AddStreamObserver(meterfunc)
+	    observers.AddStreamObserver(meterfunc)
 	}
     
-
-	orc.ReadCloser = resp.Body
-	resp.Body = orc
+    observers.SetReadCloser(resp.Body)
+	//observers.ReadCloser = resp.Body
+	resp.Body = observers
 	
 	return resp, nil
 } 
@@ -91,7 +119,7 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 
 func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
     errorResponse :=  &http.Response{
-        StatusCode: status,//429,
+        StatusCode: status,
         Status:     err,
         Body:       http.NoBody,
         Header:     make(http.Header),
@@ -115,8 +143,8 @@ func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
     }
 	
 	fmt.Println("Server headers:")
-    for key, values := range resp.Header {
+    /*for key, values := range resp.Header {
         if(key=="Openrouter-Id"){ orc.openrouterId = values[0]; }
         fmt.Println("  "+key, values)
-    }
+    }*/
 }

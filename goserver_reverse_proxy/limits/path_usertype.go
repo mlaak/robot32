@@ -12,11 +12,11 @@ import (
 //	"bytes"
 //	"io/ioutil"
     . "grp/ratelimiter"
-    s "grp/session"
+    s "grp/usersession"
 )
 
 
-func GetLimitersForPathAndUserType(path string, usertype string) (*RateLimiter,*RateLimiter){
+func GetLimitersForPathAndUserType(path string, usertype string) (IRateLimiter,IRateLimiter){
     p := path
     if strings.HasPrefix(p,"/experts/") { 
         return GetExpertsLimiters(path,usertype); 
@@ -25,29 +25,29 @@ func GetLimitersForPathAndUserType(path string, usertype string) (*RateLimiter,*
        return GetImagesLimiters(path,usertype); 
 
     } else if strings.HasPrefix(p,"/units/github_login") || strings.HasPrefix(p,"/units/google_login"){
-        return loginLimiter,    unLimiter
+        return LoginLimiter,    UnLimiter
 
     } else {
-        return staticIPLimiter, unLimiter
+        return StaticIPLimiter, UnLimiter
     }
 }
 
-func GetExpertsLimiters(path string, usertype string) (*RateLimiter,*RateLimiter){
+func GetExpertsLimiters(path string, usertype string) (IRateLimiter,IRateLimiter){
     switch usertype{
-        case s.UserTypeUnverified: return code498Limiter,  code498Limiter
-        case s.UserTypeCaptchad:   return expertIPLimiter, expertAIPLimiter
-        case s.UserTypeGithub:     return expertUSRLimiter,unLimiter
-        case s.UserTypeGoogle:     return expertUSRLimiter,unLimiter    
-        default:                 return expertIPLimiter, expertAIPLimiter
+        case s.UserTypeUnverified: return Code498Limiter,  Code498Limiter
+        case s.UserTypeCaptchad:   return ExpertIPLimiter, ExpertAIPLimiter
+        case s.UserTypeGithub:     return ExpertUSRLimiter,UnLimiter
+        case s.UserTypeGoogle:     return ExpertUSRLimiter,UnLimiter    
+        default:                   return ExpertIPLimiter, ExpertAIPLimiter
     }
 }
 
-func GetImagesLimiters(path string, usertype string) (*RateLimiter,*RateLimiter){
+func GetImagesLimiters(path string, usertype string) (IRateLimiter,IRateLimiter){
     switch usertype{
-        case s.UserTypeUnverified: return imageIPLimiter,  unLimiter
-        case s.UserTypeCaptchad:   return imageIPLimiter,  unLimiter
-        case s.UserTypeGithub:     return imageUSRLimiter, unLimiter  
-        case s.UserTypeGoogle:     return imageUSRLimiter, unLimiter
-        default:                 return imageIPLimiter,  unLimiter
+        case s.UserTypeUnverified: return ImageIPLimiter,  UnLimiter
+        case s.UserTypeCaptchad:   return ImageIPLimiter,  UnLimiter
+        case s.UserTypeGithub:     return ImageUSRLimiter, UnLimiter  
+        case s.UserTypeGoogle:     return ImageUSRLimiter, UnLimiter
+        default:                   return ImageIPLimiter,  UnLimiter
     }
 }

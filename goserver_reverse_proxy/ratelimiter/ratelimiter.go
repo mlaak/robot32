@@ -21,6 +21,14 @@ import (
 	. "grp/translator"
 )
 
+type IRateLimiter interface{
+	Allow(iporid string, context situation.IRequestContext) (bool,int,string)
+	CountUpOneConnection(iporid string)(func())
+	Addbytes(iporid string, bytesCount int64)
+	SetResponseCode(int)
+	GetNr()(int)
+}
+
 type RateLimiter struct {
 	minuteLimit *Rate
 	hourLimit *Rate
@@ -50,7 +58,7 @@ func NewRateLimiter(nr,maxRequestsPerMinute, maxRequestsPerHour, maxRequestsPerD
 
 
 
-func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},context *situation.RequestContext) (bool,int,string) {
+func (rl *RateLimiter) Allow(iporid string, context situation.IRequestContext) (bool,int,string) {
 // *********** PREPARATIONS ***********************************
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
@@ -104,6 +112,15 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},co
 	rl.hourLimit.AddRequest(iporid);
 	rl.dayLimit.AddRequest(iporid);
 	
+
+// ********** RETURN SUCCESS **********************************
+	return true, 200, ""
+}
+
+func (rl *RateLimiter) CountUpOneConnection(iporid string)(func()){
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
 	rl.activeConnections[iporid]++
 	releasefunc := func(){ //we need to track the connection close
 		rl.mu.Lock()
@@ -112,10 +129,7 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},co
 			rl.activeConnections[iporid]--
 		}
 	}
-	w.AddReleaser(releasefunc)
-
-// ********** RETURN SUCCESS **********************************
-	return true, 200, ""
+	return releasefunc
 }
 
 
@@ -128,7 +142,13 @@ func (rl *RateLimiter) Addbytes(iporid string, bytesCount int64){
 	rl.dayLimit.Addbytes(iporid,bytesCount);    
 }
 
+func (rl *RateLimiter) SetResponseCode(rc int){
+	rl.ResponseCode = rc;
+}
 
+func (rl *RateLimiter) GetNr()int{
+	return rl.nr;
+}
 
 type Rate struct {
 	requestCounts  map[string]int

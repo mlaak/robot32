@@ -1,4 +1,5 @@
-package session
+//TODO: This file is a bit of a mess
+package usersession
 
 import (
 	"fmt"
