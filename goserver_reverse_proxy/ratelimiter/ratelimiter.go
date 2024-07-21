@@ -9,7 +9,7 @@
      ||
 ***********************************************************/
 
-package main
+package ratelimiter
 
 import (
 //	"fmt"
@@ -17,7 +17,8 @@ import (
 	"sync"
 	"time"
 	"strconv"
-
+	"grp/situation"
+	. "grp/translator"
 )
 
 type RateLimiter struct {
@@ -30,7 +31,7 @@ type RateLimiter struct {
 
 	mu              sync.Mutex
 	nr int
-	responseCode int
+	ResponseCode int
 }
 
 func NewRateLimiter(nr,maxRequestsPerMinute, maxRequestsPerHour, maxRequestsPerDay,  maxParallelRequests int, maxBytesPerMinute int64, maxBytesPerHour int64, maxBytesPerDay int64) *RateLimiter {
@@ -43,13 +44,13 @@ func NewRateLimiter(nr,maxRequestsPerMinute, maxRequestsPerHour, maxRequestsPerD
 		maxParallelRequests:  maxParallelRequests,
 		
 		nr:nr,
-		responseCode: 429,
+		ResponseCode: 429,
 	}
 }
 
 
 
-func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},context *RequestContext) (bool,int,string) {
+func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},context *situation.RequestContext) (bool,int,string) {
 // *********** PREPARATIONS ***********************************
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
@@ -67,35 +68,35 @@ func (rl *RateLimiter) Allow(iporid string, w interface {AddReleaser(func())},co
 // ********** CHECK IF ACCESS IF FULLY BLOCKED ****************
 	if(rl.minuteLimit.maxRequests == 0 || rl.hourLimit.maxRequests == 0 || rl.dayLimit.maxRequests == 0){
 		txt:=TR("Not allowed (maybe you need to login or prove you are not a robot or something).",context)
-		return false, rl.responseCode, txt
+		return false, rl.ResponseCode, txt
 	}
 
 // ********** CHECK REQUEST LIMITS  ***************************
 	if(rl.minuteLimit.IsRequestLimitBroken(iporid)){
 		txt:=TR("Requests per minute exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 	if(rl.hourLimit.IsRequestLimitBroken(iporid)){
 		txt:=TR("Requests per hour exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 	if(rl.dayLimit.IsRequestLimitBroken(iporid)){
 		txt:=TR("Requests per day exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 
 // ********** CHECK DATA FLOW LIMITS  *************************
 	if(rl.minuteLimit.IsBytesLimitBroken(iporid)){
 		txt:=TR("Characters per minute exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 	if(rl.hourLimit.IsBytesLimitBroken(iporid)){
 		txt:=TR("Characters per hour exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 	if(rl.dayLimit.IsBytesLimitBroken(iporid)){
 		txt:=TR("Characters per day exceeded, wait "+rl.minuteLimit.GetWaitTimeStr(iporid,now),context);
-		return false, rl.responseCode, txt;
+		return false, rl.ResponseCode, txt;
 	}
 
 // ** INCREASE COUNTERS AND SET TRIGGER FOR CONNECTION CLOSE **

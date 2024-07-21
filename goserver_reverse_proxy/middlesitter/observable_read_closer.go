@@ -15,10 +15,10 @@ and we also get notified if connection closes.
 
 */
 
-package main
+package middlesitter
 
 import (
-	"fmt"
+//	"fmt"
 	"io"
 //	"log"
 //	"net/http"

@@ -1,17 +1,18 @@
-package main
+package limits
 
 import (
-	"fmt"
+//	"fmt"
 //	"io"
-	"log"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
+//	"log"
+//	"net/http"
+//	"net/http/httputil"
+//	"net/url"
 //	"errors"
 //	"strings" 
 //	"bytes"
 //	"io/ioutil"
-    "os"
+//    "os"
+	. "grp/ratelimiter"
 )
 
 var unLimiter *RateLimiter;
@@ -35,14 +36,16 @@ var loginLimiter *RateLimiter;     // Limit for google and login
 var code498Limiter  *RateLimiter;  //returns code 498
 
 
-fn SetupRateLimiters(){
+
+
+func SetupRateLimiters(){
 		// Parse the URL of the Apache server
 	//                                reqminute|reqhour|reqday|paralconn|   bytesmin| byteshour|  bytesday
     unLimiter =        NewRateLimiter(-1,    -1,     -1,    -1,       -1,         -1,        -1,        -1)
 	stopLimiter =      NewRateLimiter(0,      0,      0,     0,        0,          0,         0,         0)
 	
 	code498Limiter =   NewRateLimiter(1,      0,      0,     0,        0,          0,         0,         0)
-	code498Limiter.responseCode = 498; //expired or otherwise invalid token
+	code498Limiter.ResponseCode = 498; //expired or otherwise invalid token
 	
 	expertIPLimiter =  NewRateLimiter(2,     60,    300,  3000,       10,       1000,    500000,   5000000)
 	expertAIPLimiter = NewRateLimiter(3,   6000,  60000,600000,      500,    5000000,  50000000, 500000000)

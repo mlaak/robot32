@@ -12,7 +12,7 @@
     Uses ratelimiter to limit usage.
     Could use cache, loadbalancing etc... (just implement it)
 ***********************************************************/
-package main
+package middlesitter
 
 import (
 	"fmt"
@@ -26,11 +26,16 @@ import (
 //	"strings" 
 	"bytes"
 	"io/ioutil"
+    "grp/situation"
+    "grp/limits"
+    "grp/session"
+    . "grp/translator"
+    
 )
 
 // see function RoundTrip
 type MiddleSitterTransport struct {
-	originalTransport http.RoundTripper
+	OriginalTransport http.RoundTripper
 }
 
 /**************************** ROUNDTRIP ***************************************
@@ -42,13 +47,13 @@ type MiddleSitterTransport struct {
 *******************************************************************************/
 
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-    usertype, iporid := GetUser(req) 
-    context := NewRequestContext(iporid)
+    usertype, iporid := session.GetUser(req) 
+    context := situation.NewRequestContext(iporid)
     orc := &ObservableReadCloser{ip:iporid}
     orc.request = req.URL.String()
 
 
-    rateLimiter,coLimiter := PathUserRateLimitersSelect(req.URL.Path,usertype)
+    rateLimiter,coLimiter := limits.GetLimitersForPathAndUserType(req.URL.Path,usertype)
 
     if allowed, ecode, ertext := rateLimiter.Allow(iporid,orc,context);!allowed {       		
 			orc.ReleaseAll()
@@ -60,7 +65,7 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
     }
 
     // forward request to apache
-	resp, err := t.originalTransport.RoundTrip(req)
+	resp, err := t.OriginalTransport.RoundTrip(req)
 	if err != nil {
 	    orc.ReleaseAll()
 		return nil, err
@@ -79,7 +84,7 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 
 	orc.ReadCloser = resp.Body
 	resp.Body = orc
-	analyzeResponse(resp)
+	
 	return resp, nil
 } 
 

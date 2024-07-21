@@ -12,6 +12,8 @@ import (
 //	"bytes"
 //	"io/ioutil"
     "os"
+	"grp/limits"
+	"grp/middlesitter"
 )
 
 const (
@@ -21,6 +23,8 @@ const (
 var proxyAddr string
 
 func main() {
+
+	
 
 	apacheURL, err := url.Parse(apacheAddr)
 	if err != nil {
@@ -38,11 +42,11 @@ func main() {
 	}
 
 	// Create a custom transport to intercept the response (see middlesitter.go !)
-	proxy.Transport = &MiddleSitterTransport{
-		originalTransport: http.DefaultTransport,
+	proxy.Transport = &middlesitter.MiddleSitterTransport{
+		OriginalTransport: http.DefaultTransport,
 	}
 
-	SetupRateLimiters();
+	limits.SetupRateLimiters();
     
 	// Start the proxy server
 	proxyAddr = os.Args[1]
