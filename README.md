@@ -1,4 +1,7 @@
 # Robot32
+The project has dual purpose:
+    a - To contribute to open source AI ecosystem (by creating a frontent for LLMs)
+    b - To create an AI that is good in electronics and robotics (mostly by RAG - retrieval augmented generation)
 
 Based on the provided plan, it seems that the student's project, named Robot32, is primarily focused on developing a website (Robot32.com) that features a helpful AI, particularly in the field of technology, robotics, and automation. The AI will be built using open-source large language models (LLMs) from Mistral, such as Mistral 7b, Mixtral 8x7b, and Mixtral 8x22b.
 
