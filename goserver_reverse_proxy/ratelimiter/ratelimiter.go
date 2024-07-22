@@ -16,7 +16,7 @@ import (
 	"time"
 	"grp/situation"
 	. "grp/translator"
-	"fmt"
+
 )
 
 type IRateLimiter interface{
@@ -135,8 +135,6 @@ func (rl *RateLimiter) Addbytes(iporid string, bytesCount int64){
     rl.mu.Lock()
     defer rl.mu.Unlock()
 
-	fmt.Println(rl.GetNr())
-    fmt.Println(bytesCount)
 	rl.minuteLimit.Addbytes(iporid,bytesCount);
 	rl.hourLimit.Addbytes(iporid,bytesCount);
 	rl.dayLimit.Addbytes(iporid,bytesCount);    

@@ -79,7 +79,6 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
         countDownOneConnectionFunc := rateLimiter.CountUpOneConnection(iporid);
         observers.AddOnCloseFunc(countDownOneConnectionFunc)
     } else {
-        fmt.Println(rateLimiter.GetNr());
         observers.CallAllOnCloseFuncs()
 		return MakeHttpErrorResponse(ecode,ertext)
     }
@@ -103,8 +102,6 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 
 	_, shouldWeMeterBytes := resp.Header["Meter-Bytes"];
 	if shouldWeMeterBytes {
-        fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        fmt.Println(req.URL.String());
         
 	    rateLimiter.Addbytes(iporid,req.ContentLength) //add request bytes. Can this be tricked by the user?
 	    meterfunc := func(data []byte, n int64){
@@ -139,7 +136,7 @@ func MakeHttpErrorResponse(status int,err string) (*http.Response, error) {
 
 
 // *** Stuff useful for debugging ***
-    func debugPrint(req *http.Request,resp *http.Response, orc *ObservableReadCloser){
+func debugPrint(req *http.Request,resp *http.Response, orc *ObservableReadCloser){
 	fmt.Println(req.URL.String());
     fmt.Println("Client headers:")
     for key, values := range req.Header {
