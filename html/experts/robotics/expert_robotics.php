@@ -25,7 +25,7 @@ $robotics_wisdom = explode("\n\n",$robotics_wisdom);
 $ai = new GPTlib();
 $ai->setHistory($robotics_wisdom);
 
-if($_REQUEST["history"]){
+if(isset($_REQUEST["history"])){
     $ai->setHistory($_REQUEST["history"],$ai->history);
 }
    

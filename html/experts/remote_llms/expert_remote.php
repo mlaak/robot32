@@ -9,6 +9,10 @@ ignore_user_abort(true);
 header('Content-Type:text/plain'); //NB. avoid xss
 header('Meter-Bytes:true');
 
+if(isset($_REQUEST['r_user_key'])){
+    $_COOKIE['r_user_key'] = $_REQUEST['r_user_key'];
+}
+
 if(!isset($_COOKIE['r_user_key'])){
     echo "You need to connect your Openrouter account (go to SETTINGS). \n\nIt is an more expensive model (well relativly, its still cents or franction of cents but we cannot do it for free). This way you are paying these cents - not us :). ";
     exit();
