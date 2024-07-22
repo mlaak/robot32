@@ -1,0 +1,1 @@
+In this directory will be documentation about this project ass well as documents about AI.
