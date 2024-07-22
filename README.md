@@ -24,22 +24,22 @@ This approach allows for greater flexibility and easier maintenance, as experts 
 
 An example of an expert is the **illustrator** (html/experts/illustrator), which generates illustrative images to accompany user queries, primarily for decorative purposes. By default, it attempts to connect to https://fal.ai to execute a picture generation model called 'SDXL-Turbo' on their servers. However, if the generation process fails due to fal.ai's occasional stability issues, the illustrator service selects the most fitting pre-generated image from its library based on the user query. This approach embodies microservice principles of independence and fault tolerance.
 
+Experts have integration tests available, such as those located in the html/experts/illustrator/tests/integration directory. When you execute tools/test_all.php, it runs all the integration tests for the experts as well as the unit tests for the reverse proxy written in Golang.
+
+### Reverse proxy (rate limiter)
+
+Given that AI inference, including text and image generation, is computationally intensive, it is crucial to prevent system abuse. To achieve this, we utilize a limiting reverse proxy positioned in front of the experts who manage the costly AI models. This proxy oversees user sessions and monitors usage, imposing both request and character count limits on a per-minute, hourly, and daily basis.
+
+
+Since AI inference (text and image generation) is computationally quite expensive it is important to prevent the abuse of the system. That is why there is a limiting reverse proxy that sits in front of the experts (experts that run computationally expensive AI models). The proxy handles user sessions and monitors usage. It has both request and capacity (nr of characters) limits for minute, hour and day.  
 
 
 
 
 
-An example of an expert is the *illustrator* (html/experts/illustrator) which is a service that generates illustrative pictures to go with user queries (moslty for decorative purposes). By default it tries to connet to https://fal.ai to run a picture generation model 'SDXL-Turbo' on their servers. However if the generation fails (fal.ai has some stability problems) then the illustrator expert chooses a pre-generated image from it's library that it finds to be most appropriate for given user query. In that the expert encompasis the microservice ethos of being independent and fault tolerant.   
 
 
 
-
-
-
-
-An expert is like a lightweight microservice. However these experts often run under same apache server (not in separate container, though they could). These 'lightwight microservices' are independent from others and independent from the main system - they only need access to conf files. Using this approach I am trying to make the system more modular. To minimize code duplication, a lot of re-occuring logic is put into libraries (under https://github.com/mlaak/robot32lib). For example GPTlib deals with the intricacies of dealing with LLMs (Large Language ai Models). Each expert has their own copies of the libraries they use (downloaded by composer or our own system - about that later).
-
-An example of expert is the 'illustrator' (located html/experts/illustrator). It 
 
 
 
