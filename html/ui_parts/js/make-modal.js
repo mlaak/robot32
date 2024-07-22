@@ -1,7 +1,4 @@
 function make_modal(reqno){
-
-  
-
     document.getElementById('gpt-image-'+reqno).addEventListener('click', () => {
         console.log("clicked");
       document.getElementById('modal-'+reqno).classList.remove('hidden');
@@ -25,7 +22,5 @@ function make_modal(reqno){
         document.getElementById('modal-'+reqno).classList.add('hidden');
       }
     });
-
-
 }
 make_modal(0);

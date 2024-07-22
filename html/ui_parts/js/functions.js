@@ -6,7 +6,6 @@ function textToHtml(text) {
     '"': '&quot;',
     "'": '&apos;'
   };
-
   return text.replace(/[&<>"']/g, (match) => entities[match]);
 }
 
@@ -45,19 +44,12 @@ function naturalSort(arr) {
 }
 
 async function decryptText(dt,secretKey){
-  
   dt = JSON.parse(dt);
-
-
-  //console.log("123",dt,dt.encrypted,new Uint8Array(dt.encrypted));
-  //console.log("here");
   let decrypted = null;
   try{
-    //console.log("iva");
     let iva = new Uint8Array(dt.iv);
-    //console.log("ena");
     let ena = new Uint8Array(dt.encrypted);
-    //console.log("ssss",iva,ena);
+  
     decrypted = await window.crypto.subtle.decrypt(
       {name: "AES-GCM",iv: iva},
       secretKey,ena
@@ -67,12 +59,9 @@ async function decryptText(dt,secretKey){
     console.log("GOT ERROR from window.crypto.subtle.decrypt",e);
     return null;
   }
-  //console.log("not here");
 
-    //console.log("!!!",decrypted);
-
-    let dec = new TextDecoder();
-    return dec.decode(decrypted);
+  let dec = new TextDecoder();
+  return dec.decode(decrypted);
 }
 
 async function encryptText(txt,secretKey){
@@ -92,9 +81,6 @@ async function encryptText(txt,secretKey){
     {name: "AES-GCM",iv: iv},
     secretKey,new Uint8Array(ee)
   );
-
-
-  console.log("dc",decrypted);
 
   return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
 }

@@ -49,7 +49,6 @@ async function makeKey(){
     const myKey = await generateKey();
     const myKeyStr = JSON.stringify(await window.crypto.subtle.exportKey("jwk", myKey));
 
-
     document.cookie = "propesedKey="+myKeyStr;
 
     checkKey = await window.crypto.subtle.importKey("jwk",JSON.parse(myKeyStr),"AES-GCM",true, ['encrypt', 'decrypt']);
