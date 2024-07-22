@@ -12,6 +12,8 @@ if(isset($_REQUEST["prerendered"]))$use_falai = false;
 if(!$FAL_KEY && trim($FAL_KEY)==="")$use_falai = false; 
 
 if($use_falai){
+    if(isset($_REQUEST["mess_with_key"]))$FAL_KEY.="aaa";
+
     $data = ["prompt" => $content];    
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $URL);
@@ -37,7 +39,7 @@ if($use_falai){
     }
     else $dat = base64_decode(explode(',',$json['images'][0]['url'],2)[1]);
 }
-if(!$use_falai || $falai_error){
+if((!$use_falai || $falai_error)&&!isset($_REQUEST["no_prerendered"])){
     if(class_exists("Robot32lib\\ImageSource\\ImageSource")){
         $is = new ImageSource(); 
         if(strpos($content,"robot")!==false){
