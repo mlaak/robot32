@@ -35,7 +35,38 @@ The proxy is written in Golang.
 
 ### UI
 
-UI is currently written in pure javascript (no react nor angular). This partly done to speed up the load time of the main page. I plan to soon make a version of UI in react and compare the speed difference. But for now it is pure javascript and a bit messy :)
+
+
+The current user interface (UI) is implemented in pure JavaScript, without the use of frameworks like React or Angular. This approach was partly chosen to optimize the main page's loading speed. However, In the near future, I plan to develop a React version of the UI to compare performance differences. For now, the UI remains in its pure JavaScript form and is somewhat messy.
+
+To compile the HTML pages from their component parts located in `html/ui_parts`, please run the `tools/compile_html.php` script.
+
+The UI offers two main features:
+* 1. Interaction with the project's primary AI, which strives to excel in electronics and robotics.
+* 2. Communication with various open-source and proprietary large language models (LLMs) such as Mixtral, ChatGPT, and Claude. This is facilitated through integration with OpenRouter.ai. Users need an OpenRouter account to access the more advanced (and costly) models.
+
+Additionally, the UI enhances the user experience by displaying decorative images alongside user queries and AI responses. For users logged in via Google or GitHub, the UI also stores conversation history with the AI. These conversations are encrypted and stored locally in the browser, with the encryption key securely held on the server under the user's account. This ensures that the locally stored conversations become inaccessible upon user logout, maintaining data privacy.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+The UI is currently written in pure javascript (no react nor angular). This partly done to speed up the load time of the main page. I plan to soon make a version of UI in react and compare the speed difference. But for now it is pure javascript and a bit messy :)
 
 Run tools/compile_html.php to compile the html pages from their parts (html/ui_parts). 
 
