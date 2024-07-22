@@ -1,7 +1,7 @@
 # Robot32 - NB STILL IN PRE ALPHA - WORK IN PROGRESS - USE AT YOUR OWN RISK
 
 The project has dual purpose:
-* A - To contribute to open source AI ecosystem (by creating a frontent for LLMs)
+* A - To contribute to open source AI ecosystem (by creating a frontend for LLMs)
 * B - To create an AI that is good in electronics and robotics (mostly by RAG - retrieval augmented generation)
 
 ![Image of project UI](https://github.com/mlaak/robot32/blob/main/html/openscreen.png?raw=true)
