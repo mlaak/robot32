@@ -1,16 +1,7 @@
 package limits
 
 import (
-//	"fmt"
-//	"io"
-//	"log"
-//	"net/http"
-//	"net/http/httputil"
-//	"net/url"
-//	"errors"
 	"strings" 
-//	"bytes"
-//	"io/ioutil"
     . "grp/ratelimiter"
     s "grp/usersession"
 )

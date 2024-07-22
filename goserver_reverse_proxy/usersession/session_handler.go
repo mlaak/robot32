@@ -3,15 +3,10 @@ package usersession
 
 import (
 	"fmt"
-//	"io"
     "os"
 	"log"
 	"net/http"
-//	"net/http/httputil"
-//	"net/url"
-//	"errors"
 	"strings" 
-//	"bytes"
 	"io/ioutil"
     "regexp"
     "path/filepath"
@@ -30,11 +25,37 @@ func GetUser(req *http.Request)(string,string){
     c := getCookieValue(req,"r_ression_id")
     fmt.Println("Cookie is",c)
     
-    if c == "" || !IsHex(c){
+    
+    /*workingDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalf("ERROR: %v", err)
+	}
+
+	fileReader := func(filename string)(string,error){
+		str,err := ioutil.ReadFile(filename)
+		return string(str),err
+	}*/
+	return GetUserByCookieIP(c,ip,os.Getwd,ioutil.ReadFile)  
+	//return GetUserByCookieIPWDFileFunc(c,ip,workingDir,fileReader)   
+}
+
+func GetUserByCookieIP(c string, ip string, Getwd func()(string,error), ReadFile func(string)([]byte,error))(string,string){
+
+	//workingDir string, fileReader func(fnam string)(string,error)
+
+	if(Getwd == nil){
+		Getwd = os.Getwd
+	}
+	if(ReadFile == nil){
+		ReadFile = ioutil.ReadFile
+	}
+
+
+	if c == "" || !IsHex(c){
         return UserTypeUnverified,ip
     }
-    
-    workingDir, err := os.Getwd()
+
+	workingDir, err := Getwd()
 	if err != nil {
 		log.Fatalf("ERROR: %v", err)
 	}
@@ -42,7 +63,7 @@ func GetUser(req *http.Request)(string,string){
     fileName := c+".txt";
     filePath := filepath.Join(workingDir, "..", "working_data","sessions", fileName)   
     
-    data, err := ioutil.ReadFile(filePath)
+    data, err := ReadFile(filePath)
 	if err == nil { //file exists, could read
 	    fileContents := string(data)
 	    
@@ -69,8 +90,12 @@ func GetUser(req *http.Request)(string,string){
 	} else {
 	    return UserTypeUnverified,ip
 	}
-       
 }
+
+
+
+
+
 
 func getCookieValue(r *http.Request, cookieName string) string {
 	cookie, err := r.Cookie(cookieName)

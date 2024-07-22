@@ -18,17 +18,7 @@ and we also get notified if connection closes.
 package middlesitter
 
 import (
-//	"fmt"
 	"io"
-//	"log"
-//	"net/http"
-//	"net/http/httputil"
-//	"net/url"
-//	"errors"
-//
-//	"strings" 
-//	"bytes"
-//	"io/ioutil"
 )
 
 

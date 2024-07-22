@@ -12,11 +12,8 @@
 package ratelimiter
 
 import (
-//	"fmt"
-//	"net/http"
 	"sync"
 	"time"
-	"strconv"
 	"grp/situation"
 	. "grp/translator"
 )
@@ -30,9 +27,9 @@ type IRateLimiter interface{
 }
 
 type RateLimiter struct {
-	minuteLimit *Rate
-	hourLimit *Rate
-	dayLimit *Rate
+	minuteLimit IRate
+	hourLimit IRate
+	dayLimit IRate
 
 	activeConnections  map[string]int
 	maxParallelRequests  int
@@ -74,7 +71,7 @@ func (rl *RateLimiter) Allow(iporid string, context situation.IRequestContext) (
 	rl.dayLimit.ResetIfTime(iporid,now);
 	
 // ********** CHECK IF ACCESS IF FULLY BLOCKED ****************
-	if(rl.minuteLimit.maxRequests == 0 || rl.hourLimit.maxRequests == 0 || rl.dayLimit.maxRequests == 0){
+	if(rl.minuteLimit.GetMaxRequests() == 0 || rl.hourLimit.GetMaxRequests() == 0 || rl.dayLimit.GetMaxRequests() == 0){
 		txt:=TR("Not allowed (maybe you need to login or prove you are not a robot or something).",context)
 		return false, rl.ResponseCode, txt
 	}
@@ -150,66 +147,3 @@ func (rl *RateLimiter) GetNr()int{
 	return rl.nr;
 }
 
-type Rate struct {
-	requestCounts  map[string]int
-	bytesCounts   map[string]int64
-	lastResetTimes   map[string]time.Time
-
-	maxRequests int	
-	maxBytes int64
-	period time.Duration
-}
-
-func NewRate(period time.Duration, maxRequests int,maxBytes int64) *Rate {
-	return &Rate{
-		requestCounts:   make(map[string]int),
-		bytesCounts:   make(map[string]int64),
-		lastResetTimes:   make(map[string]time.Time),
-
-		maxRequests: maxRequests,
-		maxBytes: maxBytes,
-		period: period,
-	}
-}
-
-func (r *Rate) Addbytes(user string,count int64){
-	r.bytesCounts[user]+=count;
-}
-
-func (r *Rate) AddRequest(user string){
-	r.requestCounts[user]+=1;
-}
-
-func (r *Rate) IsRequestLimitBroken(user string)bool{
-	if(r.maxRequests!=-1 && r.requestCounts[user]>r.maxRequests){
-		return true
-	} else {
-		return false
-	}
-}
-
-func (r *Rate) GetWaitTimeStr(user string,now time.Time) string{
-	//TODO: make it also talk in minutes hours
-	secs := r.period.Seconds()-now.Sub(r.lastResetTimes[user]).Seconds();
-	return strconv.Itoa(int(secs))+"s";
-}
-
-
-func (r *Rate) IsBytesLimitBroken(user string) bool{
-	if(r.maxBytes!=-1 && r.bytesCounts[user]>r.maxBytes){
-		return true
-	} else {
-		return false
-	}
-}
-
-
-func (r *Rate) ResetIfTime(iporid string, now time.Time) bool{
-	if lastReset, exists := r.lastResetTimes[iporid]; !exists || now.Sub(lastReset) > r.period {
-		r.requestCounts[iporid] = 0
-		r.bytesCounts[iporid] = 0
-		r.lastResetTimes[iporid] = now
-		return true;
-	}
-	return false;
-}
