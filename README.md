@@ -1,4 +1,4 @@
-# Robot32
+# Robot32 - NB STILL IN ALPHA - USE AT YOUR OWN RISK
 
 The project has dual purpose:
 * A - To contribute to open source AI ecosystem (by creating a frontent for LLMs)
