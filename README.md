@@ -35,8 +35,6 @@ The proxy is written in Golang.
 
 ### UI
 
-
-
 The current user interface (UI) is implemented in pure JavaScript, without the use of frameworks like React or Angular. This approach was partly chosen to optimize the main page's loading speed. However, In the near future, I plan to develop a React version of the UI to compare performance differences. For now, the UI remains in its pure JavaScript form and is somewhat messy.
 
 To compile the HTML pages from their component parts located in `html/ui_parts`, please run the `tools/compile_html.php` script.
@@ -46,40 +44,6 @@ The UI offers two main features:
 * 2. Communication with various open-source and proprietary large language models (LLMs) such as Mixtral, ChatGPT, and Claude. This is facilitated through integration with OpenRouter.ai. Users need an OpenRouter account to access the more advanced (and costly) models.
 
 Additionally, the UI enhances the user experience by displaying decorative images alongside user queries and AI responses. For users logged in via Google or GitHub, the UI also stores conversation history with the AI. These conversations are encrypted and stored locally in the browser, with the encryption key securely held on the server under the user's account. This ensures that the locally stored conversations become inaccessible upon user logout, maintaining data privacy.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-The UI is currently written in pure javascript (no react nor angular). This partly done to speed up the load time of the main page. I plan to soon make a version of UI in react and compare the speed difference. But for now it is pure javascript and a bit messy :)
-
-Run tools/compile_html.php to compile the html pages from their parts (html/ui_parts). 
-
-The UI lets the user do 2 main things:
- * 1) Talk to the main AI of this project. This AI strives to have enhanced capabilities in the areas of electronics and robotics
- * 2) Talk to a number of open and propiatry LLM models (like Mixtral or ChatGPT or Claude). This is possible thanks to integration with openrouter.ai. The user needs an openrouter account to access the more advanced (costly models).
-
-Besides this, the UI displays nice decorative images alongside user queryes and AI anserws. If the user is logged in with Google or Github, then UI also stores the conversations that the user has with the AI. The data is stored in the browser in an encrypted form. The encryption key is stored in the server under the users account. This ensures that if the user loggs out then the locally stored conversations will become inaccessible.  
-
-
-
-
-
 
 
 
