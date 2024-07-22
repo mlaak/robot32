@@ -57,14 +57,15 @@ func NewMiddleSitterTransport(Original http.RoundTripper)(*MiddleSitterTransport
 *******************************************************************************/
 
 func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-    usertype, iporid := t.GetUser(req) 
+    
 
+    
+    usertype, iporid := t.GetUser(req) 
     context := t.RequestContext
     context.SetIporid(iporid)
-    
+
     observers := t.Observers;
     observers.SetRequestStr(req.URL.String())
-
 
     rateLimiter,coLimiter := t.GetLimitersForPathAndUserType(req.URL.Path,usertype)
 

@@ -42,10 +42,8 @@ func main() {
 	}
 
 	// Create a custom transport to intercept the response (see middlesitter.go !)
-	proxy.Transport = &middlesitter.MiddleSitterTransport{
-		OriginalTransport: http.DefaultTransport,
-	}
-
+	proxy.Transport = middlesitter.NewMiddleSitterTransport(http.DefaultTransport)
+	
 	limits.SetupRateLimiters();
     
 	// Start the proxy server
@@ -56,11 +54,7 @@ func main() {
 
 func analyzeRequest(req *http.Request) {
 	fmt.Printf("Received request: %s %s\n", req.Method, req.URL.Path)
-	// Add more analysis as needed
 }
 
-func analyzeResponse(resp *http.Response) {
-	fmt.Printf("Received response: Status %s, Content-Length %d\n", resp.Status, resp.ContentLength)
-}
 
 

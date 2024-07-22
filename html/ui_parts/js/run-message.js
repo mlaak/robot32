@@ -24,7 +24,6 @@ async function saveHistory(history,parent_req_no){
   
 function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
     let history_str = "";
-
     let llm_response = "";
 
     if(history!=null){
@@ -149,6 +148,22 @@ function run_message(message){
       fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
       .then(response => response.text())
       .then(data => {
+
+        if(data.includes("H0")){
+          run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+          llm_chat.setAttribute("expert_url","experts/humorist?a=1");
+        }
+        else if( data.includes("G0") ){
+
+          llm_chat.setAttribute("expert_url","experts/general?model=auto");
+          run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
+        }
+        else {
+          llm_chat.setAttribute("expert_url","experts/robotics?model=auto");
+          run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
+        }
+
+        /*
         if(data.includes("HUM")){
           run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
           llm_chat.setAttribute("expert_url","experts/humorist?a=1");
@@ -163,6 +178,8 @@ function run_message(message){
           llm_chat.setAttribute("expert_url","experts/general?model=auto");
           run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
         }
+        */
+
       });
     }
 }
