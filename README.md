@@ -45,18 +45,44 @@ The UI offers two main features:
 
 Additionally, the UI enhances the user experience by displaying decorative images alongside user queries and AI responses. For users logged in via Google or GitHub, the UI also stores conversation history with the AI. These conversations are encrypted and stored locally in the browser, with the encryption key securely held on the server under the user's account. This ensures that the locally stored conversations become inaccessible upon user logout, maintaining data privacy.
 
+### 1.4 Notes about current implementation
+
+Currently it uses openrouter.ai to do inference with LLM models and fal.ai to run image generation. Groq.com and stablehorde.net coming soon. Also fireworks.ai for custom LoRa trained LLM models is in the pipeline. 
+
+In the future vast.ai gpu rental to train and self-host compact LLM models like Mistral Nemo.
+
 
 ## 2 Installation
+
 Like mentioned, the project is not yet ready for primetime. However if you insist...
 
-The project currently requires Linux or WSL under Windows, bash, curl, golang installation at /usr/local/go/bin/go, PHP>=7.4 with php libcurl installed.
+The project currently requires Linux or WSL under Windows, bash, curl, golang installation at `/usr/local/go/bin/go`, PHP>=7.4 with php libcurl installed.
 
-Run tools/install_all.php to install dependencies and create required directories. This also installs a version of composer under tools/composer. Besides composer, this project also uses a custom packege downloader. Composer does not support subpackages from monorepos, however some of my packages are simply not large enough to warrant their own repos and are thus serverd from a monorepo https://github.com/mlaak/robot32lib   
+Run `php tools/install_all.php` to install dependencies and create required directories. This also installs a version of composer under tools/composer. Besides composer, this project also uses a custom packege downloader. Composer does not support subpackages from monorepos, however some of my packages are simply not large enough to warrant their own repos and are thus serverd from a monorepo https://github.com/mlaak/robot32lib   
+
+See `keys/README.md` for the api keys you need. This will get simpler soon for local installs but for now you need to go and get at-least openrouter key and hcaptcha key.
 
 ## 3 Testing
 
+Run `php tools/test_all.php` This will run unit tests in goserver_reverse_proxy and integration tests for experts in `html/experts/*`
+
 ## 4 Running
 
+To run dev server run `php run/run_dev.php` this will start a local php dev server at localhost:8000 and then starts the reverse proxy in front of it at localhost:8080
+
+To run on production (warning not ready for it) start apache server to serve the html folder at localhost:8000 and run runserver_80.bash in goserver_reverse_proxy. Stay tuned for https (coming soon).
+
+## 5 Current status
+
+It is very much a work in progress. Can be a bit messy - but then again maybe not always good idea to too much polish things that might still change.
+
+The robotics AI is not yet very smart. UI needs many improvements. Javascript code needs overhaul. Test covarage in all parts of the project needs to increase. Robot32lib currently has no tests yet, but some libraries there already would need them.
+
+The install procedure needs to be tested and simplified. Should not need a login or captcha for local run. 
+
+Ratelimiter configuration is currently hardcoded, needs to go into a conf file.
+
+Https support for proxy should be ready very soon. 
 
 
 <!---
