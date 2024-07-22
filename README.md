@@ -12,6 +12,26 @@ The project has dual purpose:
 ![Image of project archidecture](https://github.com/mlaak/robot32/blob/main/doc/r32diagram3.png?raw=true)
 
 
+### Experts
+
+Experts in this system function similarly to lightweight microservices. While they typically operate under the same Apache server rather than in separate containers, they maintain independence from both each other and the main system. Their primary requirement is access to configuration files.
+
+This architecture aims to enhance the system's modularity. To reduce code duplication, commonly used logic is centralized in libraries, which can be found at https://github.com/mlaak/robot32lib. For instance, GPTlib handles the complexities associated with Large Language Models (LLMs).
+
+Each expert maintains its own copies of the libraries it requires. These libraries are acquired either through Composer or through a custom system (which will be discussed in more detail later).
+
+This approach allows for greater flexibility and easier maintenance, as experts can be developed, updated, or replaced independently without affecting the entire system. It also facilitates easier scaling and potential future containerization if needed.
+
+
+
+
+
+An expert is like a lightweight microservice. However these experts often run under same apache server (not in separate container, though they could). These 'lightwight microservices' are independent from others and independent from the main system - they only need access to conf files. Using this approach I am trying to make the system more modular. To minimize code duplication, a lot of re-occuring logic is put into libraries (under https://github.com/mlaak/robot32lib). For example GPTlib deals with the intricacies of dealing with LLMs (Large Language ai Models). Each expert has their own copies of the libraries they use (downloaded by composer or our own system - about that later).
+
+An example of expert is the 'illustrator' (located html/experts/illustrator). It 
+
+
+
 
 Based on the provided plan, it seems that the student's project, named Robot32, is primarily focused on developing a website (Robot32.com) that features a helpful AI, particularly in the field of technology, robotics, and automation. The AI will be built using open-source large language models (LLMs) from Mistral, such as Mistral 7b, Mixtral 8x7b, and Mixtral 8x22b.
 
