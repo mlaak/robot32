@@ -61,18 +61,25 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 
     
     usertype, iporid := t.GetUser(req) 
-    context := t.RequestContext
+    
+    context := situation.NewRequestContext()
+    //context := t.RequestContext
     context.SetIporid(iporid)
 
-    observers := t.Observers;
+    //TODO: fix the bug here and for goodness sake, write some integration tests
+    //observers := t.Observers;
+    observers := NewObservableReadCloser()
     observers.SetRequestStr(req.URL.String())
 
     rateLimiter,coLimiter := t.GetLimitersForPathAndUserType(req.URL.Path,usertype)
+
+    //fmt.Println(rateLimiter.GetNr());
 
     if allowed, ecode, ertext := rateLimiter.Allow(iporid,context); allowed {       		
         countDownOneConnectionFunc := rateLimiter.CountUpOneConnection(iporid);
         observers.AddOnCloseFunc(countDownOneConnectionFunc)
     } else {
+        fmt.Println(rateLimiter.GetNr());
         observers.CallAllOnCloseFuncs()
 		return MakeHttpErrorResponse(ecode,ertext)
     }
@@ -96,6 +103,9 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 
 	_, shouldWeMeterBytes := resp.Header["Meter-Bytes"];
 	if shouldWeMeterBytes {
+        fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        fmt.Println(req.URL.String());
+        
 	    rateLimiter.Addbytes(iporid,req.ContentLength) //add request bytes. Can this be tricked by the user?
 	    meterfunc := func(data []byte, n int64){
 	       rateLimiter.Addbytes(iporid,n) //add downloaded bytes

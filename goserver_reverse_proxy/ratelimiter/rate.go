@@ -3,6 +3,7 @@ package ratelimiter
 import (
 	"time"
 	"strconv"
+//	"fmt"
 )
 
 type IRate interface {
@@ -65,6 +66,7 @@ func (r *Rate) GetWaitTimeStr(user string,now time.Time) string{
 
 func (r *Rate) IsBytesLimitBroken(user string) bool{
 	if(r.maxBytes!=-1 && r.bytesCounts[user]>r.maxBytes){
+		//fmt.Println(r.bytesCounts[user])
 		return true
 	} else {
 		return false

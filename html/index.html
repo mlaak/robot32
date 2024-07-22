@@ -393,7 +393,6 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     '"': '&quot;',
     "'": '&apos;'
   };
-
   return text.replace(/[&<>"']/g, (match) => entities[match]);
 }
 
@@ -432,19 +431,12 @@ function naturalSort(arr) {
 }
 
 async function decryptText(dt,secretKey){
-  
   dt = JSON.parse(dt);
-
-
-  //console.log("123",dt,dt.encrypted,new Uint8Array(dt.encrypted));
-  //console.log("here");
   let decrypted = null;
   try{
-    //console.log("iva");
     let iva = new Uint8Array(dt.iv);
-    //console.log("ena");
     let ena = new Uint8Array(dt.encrypted);
-    //console.log("ssss",iva,ena);
+  
     decrypted = await window.crypto.subtle.decrypt(
       {name: "AES-GCM",iv: iva},
       secretKey,ena
@@ -454,12 +446,9 @@ async function decryptText(dt,secretKey){
     console.log("GOT ERROR from window.crypto.subtle.decrypt",e);
     return null;
   }
-  //console.log("not here");
 
-    //console.log("!!!",decrypted);
-
-    let dec = new TextDecoder();
-    return dec.decode(decrypted);
+  let dec = new TextDecoder();
+  return dec.decode(decrypted);
 }
 
 async function encryptText(txt,secretKey){
@@ -479,9 +468,6 @@ async function encryptText(txt,secretKey){
     {name: "AES-GCM",iv: iv},
     secretKey,new Uint8Array(ee)
   );
-
-
-  console.log("dc",decrypted);
 
   return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
 }
@@ -516,9 +502,6 @@ async function encryptText(txt,secretKey){
     function template(name,...replaces){ 
     var s = document.getElementById(name).innerHTML;
     
-    
-    //console.log(replaces);
-    
     if(replaces){
         replaces.forEach(function(r) {
             s = s.split(r[0]).join(r[1]);
@@ -543,7 +526,6 @@ function findParentByClassName(element, className) {
         return currentElement;
       }
     }
-  
     return null; // return null if not found
 }
 
@@ -555,10 +537,8 @@ interaction_no = localStorage.getItem("reqno")*1;
 
 function add_interaction_continue(el,el2,message){
     interaction_no += 1;
-    
-    
-    el.removeChild(el2);
-    
+
+    el.removeChild(el2);    
      let message_interaction = template("template_message_continue",
                                 ["!!USER-REQUEST!!",textToHtml(message)],
                                 ["!!REQNO!!",interaction_no+""]);   
@@ -575,15 +555,10 @@ function add_reply_to(el){
     el.appendChild(reply_to);
 }
 
-
-
-
 function add_interaction(message){
-    interaction_no += 1;
-    
+    interaction_no += 1;    
     let cma = document.getElementById("chat-messages-area");
-    
-    
+
     let message_interaction = template("template_message_interaction",
                                 ["!!USER-REQUEST!!",textToHtml(message)],
                                 ["!!REQNO!!",interaction_no+""]); 
@@ -593,45 +568,21 @@ function add_interaction(message){
       
     cma.insertBefore(message_interaction, cma.firstChild);
     document.getElementById("user-message-"+interaction_no).setAttribute("chat",message);
-
     
     add_reply_to(cma.firstChild);
-    //cma.firstChild.appendChild(reply_to);
     
     return interaction_no;
     
-    /*var message_interaction = document.getElementById("template_message_interaction").innerHTML;
-    const newHtml = message_interaction.replace("!!USER-REQUEST!!",textToHtml(message)).split("!!REQNO!!").join(interaction_no+"");
-    let e = document.getElementById("chat-messages-area");
-    //If I have a html code as a string, then I want to make it to html object and insert it after another existing object. How do I do it?
-    var newDiv = document.createElement("div");
-    newDiv.innerHTML = newHtml;
-    
-    e.insertBefore(newDiv, e.firstChild);
-    
-    
-    var replyto = document.getElementById("template_reply_to_message").innerHTML;
-    const newReplyTo = replyto.split("!!REQNO!!").join(interaction_no+"");
-    var newReplyToDiv = document.createElement("div");
-    newReplyToDiv.innerHTML = newReplyTo;
-    e.firstChild.appendChild(newReplyToDiv);
-    
-    //e.after(newDiv);
-    return interaction_no;*/
 }
 
 
 
 function restore_interaction(reqno,img,history){
-
-    
     if(history == null)return 0;
     if(document.getElementById("interaction-"+reqno)!=null)return 0;
 
     let cma = document.getElementById("chat-messages-area");
-    
-
-    
+        
     let message_interaction = template("tpl_interaction",
                                 ["!!REQNO!!",reqno]); 
 
@@ -660,7 +611,6 @@ function restore_interaction(reqno,img,history){
                     ["!!REQNO!!",interaction_no+""]);
             }
 
-
             message_interaction.appendChild(usrt);
         }
         else if(h.startsWith("ai:")){
@@ -681,9 +631,6 @@ function restore_interaction(reqno,img,history){
             message_interaction.appendChild(airesp);
         }
     }
-
-    //add_reply_to(cma.firstChild);
-    //cma.firstChild.appendChild(reply_to);
     
     return interaction_no;
 }
@@ -707,7 +654,6 @@ async function do_load_previous_chat(){
         if(all_keys[i].startsWith("history")){
             let r = await load_chat_part(all_keys[i]);
             if(r!=0){
-                //console.log("rrrrrrrrrrrrrrrrrrrrr",r);
                 displayed++;
             }
             if(displayed>=max)break; 
@@ -717,272 +663,210 @@ async function do_load_previous_chat(){
 }
 
 async function load_chat_part(id){
-    //console.log("load chat part");
     let num = id.substring(7)*1;
     let dt = localStorage.getItem(id);
 
-    //console.log(id,dt);
     let decrypted =await decryptText(dt,ClientSecretKey);
-    //console.log("jjj",decrypted);
     let dat = JSON.parse(decrypted);
 
     let img_dt = localStorage.getItem("img"+num);
-    //console.log("here 1");
     let img_src = "";
     if(img_dt!=null){
         img_src = await decryptText(img_dt,ClientSecretKey);
     }
 
-    //console.log("here");
-    //console.log(num,img_src,dat);
-
     return restore_interaction(num,img_src,dat);
-
-    /*let decrypted = await window.crypto.subtle.decrypt(
-        {name: "AES-GCM",iv: dt.iv},
-        key,dt.encrypted
-      );
-      let dec = new TextDecoder();
-      let txt = dec.decode(decrypted);*/
 }
 
 
  
-    
-function get_chat_history(element,out = []){
+    function get_chat_history(element,out = []){
   for (let i = 0; i < element.children.length; i++) {
     const child = element.children[i];
-    //console.log("child is",child,child.tagName);
     if(child.getAttribute('role') == "user" || child.getAttribute('role') == "ai"){
       out.push(child.getAttribute('role')+":"+child.getAttribute('chat'));
     }
     else if(child.tagName=="DIV"){
       get_chat_history(child,out);
     }
-    // Do something with the child element
-    
   }
   return out;
 }
-    async function saveHistoryImg(parent_req_no,val){
-      let encryptedData = await encryptText(val,ClientSecretKey);
-      localStorage.setItem("img"+parent_req_no,encryptedData);
-    }
 
-    async function saveHistory(history,parent_req_no){
-     /* const textEncoder = new TextEncoder();
-      let dt = textEncoder.encode(JSON.stringify(history));
-      const encryptedData = await window.crypto.subtle.encrypt(
-        {
-          name: 'AES-GCM',
-          iv: window.crypto.getRandomValues(new Uint8Array(12)), // the initialization vector should be unique for each encryption
-        },
-        ClientSecretKey,
-        dt
-      );*/
-      let encryptedData = await encryptText(JSON.stringify(history),ClientSecretKey);
-     
-      console.log(encryptedData);
-        
-      localStorage.setItem("history"+parent_req_no,encryptedData);
+async function saveHistoryImg(parent_req_no,val){
+  let encryptedData = await encryptText(val,ClientSecretKey);
+  localStorage.setItem("img"+parent_req_no,encryptedData);
+}
 
-      console.log(localStorage.getItem("history"+parent_req_no));
-
-
-
-    }
+async function saveHistory(history,parent_req_no){
+  let encryptedData = await encryptText(JSON.stringify(history),ClientSecretKey);        
+  localStorage.setItem("history"+parent_req_no,encryptedData);
+  console.log(localStorage.getItem("history"+parent_req_no));
+}
   
-    function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
-        let history_str = "";
+function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
+    let history_str = "";
+    let llm_response = "";
 
-        let llm_response = "";
-
-        if(history!=null){
-            history_str = "&history="+encodeURIComponent(JSON.stringify(history));
+    if(history!=null){
+        history_str = "&history="+encodeURIComponent(JSON.stringify(history));
+    }
+    fetch(llm_url+'&content='+encodeURIComponent(message)+history_str,{credentials: "same-origin"})
+      .then(response => {
+        if (!response.ok) {
+            if(response.status==498){
+                window.location.href="login.html";
+            }    
+            const headerString = Array.from(response.headers.entries())
+              .map(([key, value]) => `${key}: ${value}`)
+              .join('\n');
+            gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(headerString+"");              
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-        fetch(llm_url+'&content='+encodeURIComponent(message)+history_str,{credentials: "same-origin"})
-        //fetch('tes.php?content='+message)
-          .then(response => {
-          //console.log(response)
-            if (!response.ok) {
-                if(response.status==498){
-                    window.location.href="login.html";
-                }    
-                console.log(response)
-                 //const decoder = new TextDecoder();
-                //let elem = document.getElementById("gpt-text-"+reqno);
-                 const headerString = Array.from(response.headers.entries())
-                  .map(([key, value]) => `${key}: ${value}`)
-                  .join('\n');
-                  
-      
-                gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(headerString+"");
-                                
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.body;
-          })
-          .then(stream => {
-            const reader = stream.getReader();
-            const decoder = new TextDecoder();
+        return response.body;
+      })
+      .then(stream => {
+        const reader = stream.getReader();
+        const decoder = new TextDecoder();
 
-            // Read the stream in chunks
-            function read() {
-              return reader.read().then(({ done, value }) => {
-                if (done) {
-                  if(history==null)history = [];
-                  history.push("user:"+message);
-                  history.push("ai:"+llm_response);
-                  
-
-                  saveHistory(history,parent_req_no);
-
-
-                  console.log(history);
-
-                  console.log('Stream reading complete');
-
-                  return;
-                }
-
-                // Decode the chunk to a string and log it
-                //let elem = document.getElementById("gpt-text-"+reqno);
-                llm_response+=decoder.decode(value);
-
-                gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
-                gpt_text_elem.parentNode.parentNode.setAttribute("chat",gpt_text_elem.parentNode.parentNode.getAttribute("chat")+decoder.decode(value));
-                //console.log(decoder.decode(value));
-
-                // Read the next chunk
-                return read();
-              });
+        // Read the stream in chunks
+        function read() {
+          return reader.read().then(({ done, value }) => {
+            if (done) {
+              if(history==null)history = [];
+              history.push("user:"+message);
+              history.push("ai:"+llm_response);
+              saveHistory(history,parent_req_no);
+              return;
             }
 
-            // Start reading the stream
-            return read();
-          })
-          .catch(err => console.error(err));        
-    }
+            llm_response+=decoder.decode(value);
+
+            gpt_text_elem.innerHTML = gpt_text_elem.innerHTML+textToHtml(decoder.decode(value));
+            gpt_text_elem.parentNode.parentNode.setAttribute("chat",gpt_text_elem.parentNode.parentNode.getAttribute("chat")+decoder.decode(value));
+            
+            return read(); // Read the next chunk
+          });
+        }
+        // Start reading the stream
+        return read();
+      })
+      .catch(err => console.error(err));        
+}
   
-    function run_message_continue(el,el2,message){
-        //let reqno = add_interaction(message);
-        
-        llm_chat = findParentByClassName(el,"llm_interaction");
-        let history = get_chat_history(llm_chat);
-        
-        let reqno = add_interaction_continue(el,el2,message);
-        
+function run_message_continue(el,el2,message){
+    //let reqno = add_interaction(message);
+    
+    llm_chat = findParentByClassName(el,"llm_interaction");
+    let history = get_chat_history(llm_chat);
+    
+    let reqno = add_interaction_continue(el,el2,message);
+    
 
-        var prn = findParentByClassName(el,"llm_interaction");
-        let parent_req_no = prn.getAttribute("interaction_no");
+    var prn = findParentByClassName(el,"llm_interaction");
+    let parent_req_no = prn.getAttribute("interaction_no");
 
-        localStorage.setItem("reqno",reqno);
+    localStorage.setItem("reqno",reqno);
 
-        let llm_url = document.getElementById("model-select").value;
-        gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
-        
-        
-
-        if(llm_url!="R32"){
-          run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
-        }
-        else {
-          let expert_url = llm_chat.getAttribute("expert_url");
-          if(!expert_url)expert_url = "experts/general?model=auto";
-          run_llm_query(expert_url,parent_req_no,message,history,gpt_text_elem);
-        }
-        
+    let llm_url = document.getElementById("model-select").value;
+    gpt_text_elem = document.getElementById("gpt-text-cont-"+reqno);
+    
+    if(llm_url!="R32"){
+      run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem);
+    }
+    else {
+      let expert_url = llm_chat.getAttribute("expert_url");
+      if(!expert_url)expert_url = "experts/general?model=auto";
+      run_llm_query(expert_url,parent_req_no,message,history,gpt_text_elem);
     }
     
-    function run_message(message){
-        let reqno = add_interaction(message);
-        
-        localStorage.setItem("reqno",reqno);
+}
+    
+function run_message(message){
+    let reqno = add_interaction(message);
+    
+    localStorage.setItem("reqno",reqno);
 
-        let messageBox = document.getElementById("message-box");
-        messageBox.value = "";
-        messageBox.style.height = 'auto';
-        messageBox.style.height = messageBox.scrollHeight + 'px';
+    let messageBox = document.getElementById("message-box");
+    messageBox.value = "";
+    messageBox.style.height = 'auto';
+    messageBox.style.height = messageBox.scrollHeight + 'px';
+    
+    fetch('experts/illustrator?content='+encodeURIComponent(message),{credentials: "same-origin"})
+      .then(response => {
+        var imgdata = response.headers.get("Return-Image");
+        document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;
+        return response.json();
+      })
+      .then(data => {
+        document.getElementById("gpt-image-"+reqno).src_link = data.image;
         
-        
-        
-        //fetch('routers/falai/falai.php?content='+encodeURIComponent(message))
-        fetch('experts/illustrator?content='+encodeURIComponent(message),{credentials: "same-origin"})
-          .then(response => {
-            var imgdata = response.headers.get("Return-Image");
-            document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;
-            return response.json();
-          })
-          .then(data => {
-//            document.getElementById("gpt-image-"+reqno).src = data.image;
-            document.getElementById("gpt-image-"+reqno).src_link = data.image;
-            
-            saveHistoryImg(reqno,data.image);
-            //localStorage.setItem("img"+reqno,data.image);
+        saveHistoryImg(reqno,data.image);
 
-            console.log(data);
-            
-            var picture_modal = document.getElementById("template_picture_modal").innerHTML;
-            const newHtml = picture_modal.split("!!REQNO!!").join(interaction_no+"").split("!!IMGSRC!!").join(data.image);
-            
-            let e = document.getElementById("modal-0");
-            const newDiv = document.createElement("div");
-            newDiv.innerHTML = newHtml;
-            e.parentNode.insertBefore(newDiv, e);
-            
-            
-            make_modal(reqno);
-            //modal  
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
+        var picture_modal = document.getElementById("template_picture_modal").innerHTML;
+        const newHtml = picture_modal.split("!!REQNO!!").join(interaction_no+"").split("!!IMGSRC!!").join(data.image);
         
-        let llm_url = document.getElementById("model-select").value;
-        gpt_text_elem = document.getElementById("gpt-text-"+reqno);
+        let e = document.getElementById("modal-0");
+        const newDiv = document.createElement("div");
+        newDiv.innerHTML = newHtml;
+        e.parentNode.insertBefore(newDiv, e);
+        
+        make_modal(reqno);
+          
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    
+    let llm_url = document.getElementById("model-select").value;
+    gpt_text_elem = document.getElementById("gpt-text-"+reqno);
 
-        let llm_chat = findParentByClassName(gpt_text_elem,"llm_interaction");
-        
-        if(llm_url!="R32"){
-          run_llm_query(llm_url,reqno,message,null,gpt_text_elem);
+    let llm_chat = findParentByClassName(gpt_text_elem,"llm_interaction");
+    
+    if(llm_url!="R32"){
+      run_llm_query(llm_url,reqno,message,null,gpt_text_elem);
+    }
+    else {
+      fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
+      .then(response => response.text())
+      .then(data => {
+
+        if(data.includes("H0")){
+          run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+          llm_chat.setAttribute("expert_url","experts/humorist?a=1");
+        }
+        else if( data.includes("G0") ){
+
+          llm_chat.setAttribute("expert_url","experts/general?model=auto");
+          run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
         }
         else {
-          fetch('experts/classifier?model=mistralai/mixtral-8x7b-instruct&content='+encodeURIComponent(message),{credentials: "same-origin"})
-          .then(response => response.text())
-          .then(data => {
-            if(data.includes("HUM")){
-              run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
-              llm_chat.setAttribute("expert_url","experts/humorist?a=1");
-            }
-            else if(data.includes("CCELE") || data.includes("CCPRO") || data.includes("CCAI") || 
-              data.includes("CCTEC")    
-            ){
-              llm_chat.setAttribute("expert_url","experts/robotics?model=auto");
-              run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
-            }
-            else {
-              llm_chat.setAttribute("expert_url","experts/general?model=auto");
-              run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
-            }
-            // do something with the data here
-          });
-  //            document.getElementById("gpt-image-"+reqno).src = data.image;
-            //document.getElementById("gpt-image-"+reqno).src_link = data.image;
-          
+          llm_chat.setAttribute("expert_url","experts/robotics?model=auto");
+          run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
         }
 
-        
+        /*
+        if(data.includes("HUM")){
+          run_llm_query("experts/humorist?a=1",reqno,message,null,gpt_text_elem);
+          llm_chat.setAttribute("expert_url","experts/humorist?a=1");
+        }
+        else if(data.includes("CCELE") || data.includes("CCPRO") || data.includes("CCAI") || 
+          data.includes("CCTEC")    
+        ){
+          llm_chat.setAttribute("expert_url","experts/robotics?model=auto");
+          run_llm_query("experts/robotics?model=auto",reqno,message,null,gpt_text_elem);
+        }
+        else {
+          llm_chat.setAttribute("expert_url","experts/general?model=auto");
+          run_llm_query("experts/general?model=auto",reqno,message,null,gpt_text_elem);
+        }
+        */
 
-
-        
-        
-        
+      });
     }
+}
  
     function make_modal(reqno){
-
-  
-
     document.getElementById('gpt-image-'+reqno).addEventListener('click', () => {
         console.log("clicked");
       document.getElementById('modal-'+reqno).classList.remove('hidden');
@@ -1006,69 +890,66 @@ function get_chat_history(element,out = []){
         document.getElementById('modal-'+reqno).classList.add('hidden');
       }
     });
-
-
 }
 make_modal(0);
   
-     // Speech-to-text
-    const microphoneBtn = document.getElementById('microphone-btn');
+    // Speech-to-text
+const microphoneBtn = document.getElementById('microphone-btn');
 
-    window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    if(window.SpeechRecognition){
-        recognition = new SpeechRecognition("sv-SE");
-    }
-    else recognition = {};
-    //recognition.continuous = true; 
-    recognition.lang = "sv-SE";
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recognition = null;
+if(window.SpeechRecognition){
+    recognition = new SpeechRecognition("sv-SE");
+}
+else recognition = {};
+//recognition.continuous = true; 
+recognition.lang = "sv-SE";
 
-    function beep() {
-            const audio = new Audio(audiofile); // Very short beep sound
-      audio.play();
-    }
+function beep() {
+  const audio = new Audio(audiofile); // Very short beep sound
+  audio.play();
+}
 
-    microphoneBtn.addEventListener('click', () => {
-      if (recognition.continuous) {
-        recognition.continuous = false;
-        recognition.stop();
-        microphoneBtn.classList.remove('bg-red-500', 'text-white');
-        microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
-        //beep();
-      } else {
-        recognition.continuous = true;
-        recognition.start();
-        recognition.continuous = true;
-        beep();
-        microphoneBtn.classList.add('bg-red-500', 'text-white');
-        microphoneBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700');
-      }
-    });
+microphoneBtn.addEventListener('click', () => {
+  if (recognition.continuous) {
+    recognition.continuous = false;
+    recognition.stop();
+    microphoneBtn.classList.remove('bg-red-500', 'text-white');
+    microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+    //beep();
+  } else {
+    recognition.continuous = true;
+    recognition.start();
+    recognition.continuous = true;
+    beep();
+    microphoneBtn.classList.add('bg-red-500', 'text-white');
+    microphoneBtn.classList.remove('bg-gray-200', 'dark:bg-gray-700');
+  }
+});
 
-    recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length-1][0].transcript;
-      console.log(event.results);
-      if(transcript.replace(/\s/g, "")=="stopstop"){
-        recognition.continuous = false;
-        recognition.stop();
-        microphoneBtn.classList.remove('bg-red-500', 'text-white');
-        microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
-      }
-      else messageBox.value += transcript + ' '; 
-       
-    };
+recognition.onresult = (event) => {
+  const transcript = event.results[event.results.length-1][0].transcript;
 
-    recognition.onend = () => {
-      microphoneBtn.classList.remove('bg-red-500', 'text-white');
-      microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
-      recognition.stop();
-       recognition.continuous = false;
- 
-      beep();
-      run_message(document.getElementById('message-box').value);
-      document.getElementById('message-box').value="";
-      //recognition = new SpeechRecognition();
-    };
+  if(transcript.replace(/\s/g, "")=="stopstop"){
+    recognition.continuous = false;
+    recognition.stop();
+    microphoneBtn.classList.remove('bg-red-500', 'text-white');
+    microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+  }
+  else messageBox.value += transcript + ' '; 
+};
+
+recognition.onend = () => {
+  microphoneBtn.classList.remove('bg-red-500', 'text-white');
+  microphoneBtn.classList.add('bg-gray-200', 'dark:bg-gray-700');
+  recognition.stop();
+    recognition.continuous = false;
+
+  beep();
+  run_message(document.getElementById('message-box').value);
+  document.getElementById('message-box').value="";
+  //recognition = new SpeechRecognition();
+};
 </script>
 
 

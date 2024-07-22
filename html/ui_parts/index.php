@@ -73,22 +73,13 @@
     <?php echo "<!--";require __DIR__."/templates/tpl_interaction.htm";?>
     <?php echo "<!--";require __DIR__."/templates/tpl_usr_query_cont.htm";?>
     <?php echo "<!--";require __DIR__."/templates/tpl_usr_query_inital.htm";?>
-
-
 </div>  
  
-  
-
 
 <script src="beep.jsi"></script>
 <script>
 
-
-
     <?php include __DIR__."/js/functions.js";?>
-
-
-
 
     if(!checkCookieExists('r_ression_id')){
         window.location.href="login.html";
@@ -109,7 +100,6 @@
     }
     loadSecret();
 
-
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
           document.getElementById('sidebar-menu').classList.toggle('hidden');
     });
@@ -120,9 +110,6 @@
     <?php include __DIR__."/js/make-modal.js"; ?>  
     <?php include __DIR__."/js/speech-to-text.js"; ?>
 </script>
-
-
-
 
 </body>
 </html>
