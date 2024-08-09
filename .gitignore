@@ -2,3 +2,6 @@ keys/**
 collected_data/**
 working_data/**
 html/recieved_images/**
+tools/composer/**
+debug/out/**
+
