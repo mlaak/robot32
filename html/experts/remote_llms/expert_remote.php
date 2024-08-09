@@ -4,6 +4,19 @@ require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
 require __DIR__."/vendor/autoload.php";
 use Robot32lib\GPTlib\GPTlib;
 use Robot32lib\ULogger\ULogger;
+declare(ticks=1);
+
+$arh = apache_request_headers();
+if(isset($arh["Ttd"])){
+    TTD_INIT($arh["Ttd"]*1);
+}
+
+/*function TDD_SET($c){
+    global $TDD_c;
+    $TDD_c = $c;
+}
+
+function TTD($message,...$params){*/
 
 ignore_user_abort(true); 
 header('Content-Type:text/plain'); //NB. avoid xss
@@ -17,6 +30,11 @@ if(!isset($_COOKIE['r_user_key'])){
     echo "You need to connect your Openrouter account (go to SETTINGS). \n\nIt is an more expensive model (well relativly, its still cents or franction of cents but we cannot do it for free). This way you are paying these cents - not us :). ";
     exit();
 }
+
+
+
+TTD("HERE!!!!!!!!!!!!!!!","varname","val");
+
 //$OPENROUTER_API_KEY = trim(file_get_contents(__DIR__."/../../../keys/openrouter.txt"));       
 $OPENROUTER_API_KEY = $_COOKIE['r_user_key']; //we require user have their own key (expensive models)
 
@@ -31,7 +49,7 @@ $headers = [
 ];
 
 $ai = new GPTlib($URL,$headers,TRUE);
-$ai->setHistory($_REQUEST["history"] ?? null);
+$ai->setHistory(TTX($_REQUEST["history"] ?? null));
 
 $options = [
     "temperature"=> 1,
@@ -40,19 +58,19 @@ $options = [
     "stream"=> true,
     "stop"=> null
     ];
-$content = $_REQUEST["content"];
-$model = $_REQUEST["model"];
+$content = TTX($_REQUEST["content"]);
+$model = TTX($_REQUEST["model"]);
 
 $r = $ai->chat($content,$model,$options,function($txt,$data){
     if(!headers_sent() && isset($data['id'])){
-        header("openrouter-id: ".$data['id']);
+        header("openrouter-id: ".TTX($data['id']));
     }
-    echo $txt; //send the piece of prompt response to the user
+    echo TTX($txt); //send the piece of prompt response to the user
     @flush(); @ob_flush(); @ob_clean(); //make sure data gets to user ASAP
 }); 
 
 if($r['error_code']){
-    echo "Error ".$r['error_code']." ".$r['error'];
+    echo "Error ".TTX($r['error_code'])." ".TTX($r['error']);
 }
 
 $logger = new ULogger($BASE_DIR);

@@ -16,9 +16,11 @@ chdir($cwd);
 
 @mkdir(__DIR__."/../keys",0777,true);
 @mkdir(__DIR__."/../working_data/sessions",0777,true);
+@mkdir(__DIR__."/../working_data/ttd",0777,true);
 @mkdir(__DIR__."/../collected_data/chats",0777,true);
 
 @mkdir(__DIR__."/../html/recieved_images",0777,true);
+
 
 echo "\n";
 echo "Make sure your keys are in keys folder \n";

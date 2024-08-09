@@ -373,17 +373,11 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
   </div>
   
 </div>
-
-
 </div>  
  
-  
-
 
 <script src="beep.jsi"></script>
 <script>
-
-
 
     function textToHtml(text) {
   const entities = {
@@ -472,9 +466,6 @@ async function encryptText(txt,secretKey){
   return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
 }
 
-
-
-
     if(!checkCookieExists('r_ression_id')){
         window.location.href="login.html";
     }
@@ -493,7 +484,6 @@ async function encryptText(txt,secretKey){
         }
     }
     loadSecret();
-
 
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
           document.getElementById('sidebar-menu').classList.toggle('hidden');
@@ -951,9 +941,6 @@ recognition.onend = () => {
   //recognition = new SpeechRecognition();
 };
 </script>
-
-
-
 
 </body>
 </html>

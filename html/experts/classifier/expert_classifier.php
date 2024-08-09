@@ -50,6 +50,7 @@ if(pmatch($usrq,$ptrn_pi_pico))    {echo ClassTree::MICROCONTROLLERS;exit();}
 
 $LLMServerList = new LLMServerList();
 $llms_to_try = $LLMServerList->getLLMFor("fast");
+
 $ai = new GPTlib();
 
 
@@ -59,6 +60,7 @@ $ai->setOptions([
     "stop"=> null,      "curl_timeout" => 10,
     "curl_connect_timeout"=>5
 ]);
+
 
 $user_query = str_replace('"','',$_REQUEST["content"]);
 

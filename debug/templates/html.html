@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debugger Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #code-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #f0f0f0;
+            padding: 10px;
+            white-space: pre;
+            font-family: monospace;
+        }
+        #data-area {
+            height: 100px;
+            background-color: #e0e0e0;
+            padding: 10px;
+            overflow-y: auto;
+        }
+        .code-line {
+            padding: 2px 5px;
+        }
+        .current-line {
+            background-color: #ffff00;
+        }
+
+	.bold-symbol {
+            font-weight: 900;
+            color: #00008B;
+        }
+
+    </style>
+</head>
+<body>
+    <p id="file-name"></p>
+    <div id="code-area"><pre  id="code-area-pre"></pre></div>
+    <div id="data-area"></div>
+
+    <script>
+
+
+async function unpackString(base64CompressedString) {
+  // Decode the base64 string to a Uint8Array
+  const binaryString = atob(base64CompressedString.replace(/-/g, "+").replace(/_/g, "/"));
+  const compressedData = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    compressedData[i] = binaryString.charCodeAt(i);
+  }
+
+  // Create a DecompressionStream with gzip format
+  const decompressStream = new DecompressionStream('gzip');
+
+  // Create a ReadableStream from the compressed data
+  const compressedStream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(compressedData);
+      controller.close();
+    }
+  });
+
+  // Pipe the compressed stream through the decompression stream
+  const decompressedStream = compressedStream.pipeThrough(decompressStream);
+
+  // Read the decompressed data
+  const decompressedResponse = new Response(decompressedStream);
+  const decompressedArrayBuffer = await decompressedResponse.arrayBuffer();
+
+  // Convert the ArrayBuffer to a string
+  const decompressedString = new TextDecoder().decode(decompressedArrayBuffer);
+
+  return decompressedString;
+}
+
+
+
+
+
+
+	function formatSymbols(line) {
+
+            line = line.split("&").join("&amp;");
+            line = line.split("<").join("&lt;");
+            line = line.split(">").join("&gt;");
+
+            const symbols = /([(){}"'!+\-=<>])/g;
+            return line.replace(symbols, '<span class="bold-symbol">$1</span>');
+        }
+
+        function displayCode(sourceCode) {
+            const codeArea = document.getElementById('code-area-pre');
+            codeArea.innerHTML = '';
+            
+            const lines = sourceCode.split('\n');
+            lines.forEach((line, index) => {
+                const lineElement = document.createElement('div');
+                lineElement.className = 'code-line';
+		if(line=="")line = " ";
+
+
+		const formattedLine = formatSymbols(line);
+                lineElement.innerHTML = formattedLine;
+
+                //lineElement.textContent = line;
+                lineElement.setAttribute('data-line-number', index + 1);
+                codeArea.appendChild(lineElement);
+            });
+        }
+
+        function markCurrentLine(lineNumber) {
+            // Remove current-line class from all lines
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('current-line');
+            });
+
+            // Add current-line class to the specified line
+            const currentLine = document.querySelector(`.code-line[data-line-number="${lineNumber}"]`);
+            if (currentLine) {
+                currentLine.classList.add('current-line');
+                currentLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        // Example usage:
+        const exampleCode = `function greet(name) {
+    console.log("Hello, " + name + "!");
+}
+
+for (let i = 0; i < 3; i++) {
+    greet("User " + i);
+}`;
+
+       /* displayCode(exampleCode);
+
+        // Simulate debugging by marking different lines every 2 seconds
+        let currentLine = 1;
+        setInterval(() => {
+            markCurrentLine(currentLine);
+            currentLine = (currentLine % 6) + 1; // Cycle through lines 1-6
+        }, 2000);
+        */
+        var FILES = {};
+        var LINES = [];
+        var CODEPOINT = {row:0,deep:0}
+        var CURRENT_FILE = "";
+        var CURRENT_LINE = -1;
+
+
+        function CODEPOINT_start(){
+            CODEPOINT_goto(0,-1)
+        }
+
+
+        function RECORD_stepover(){
+            curr_dep = RECORD[RECORD_place][1];
+            for(RECORD_place++;RECORD_place<RECORD.length-1;RECORD_place++){
+                if(RECORD[RECORD_place][1]<=curr_dep){
+                    break;
+                }
+            }
+            CODEPOINT_goto(RECORD[RECORD_place][0],RECORD[RECORD_place][1]);
+        }
+
+        function RECORD_stepover_back(){
+            curr_dep = RECORD[RECORD_place][1];
+            for(RECORD_place--;RECORD_place>0;RECORD_place--){
+                if(RECORD[RECORD_place][1]<=curr_dep){
+                    break;
+                }
+            }
+            CODEPOINT_goto(RECORD[RECORD_place][0],RECORD[RECORD_place][1]);
+        }
+
+
+        function RECORD_next(){
+            RECORD_place++;
+            if(RECORD_place>=RECORD.length)RECORD_place = RECORD.length-1;
+            CODEPOINT_goto(RECORD[RECORD_place][0],RECORD[RECORD_place][1]);
+        }
+
+
+        function RECORD_prev(){
+            RECORD_place--;
+            if(RECORD_place<0)RECORD_place = 0;
+            CODEPOINT_goto(RECORD[RECORD_place][0],RECORD[RECORD_place][1]);
+        }
+
+
+        var RECORD_place = -1;
+        var RECORD = [];
+        function CODEPOINT_record_all(){
+            RECORD = [];
+            r = [-1,-1];
+            while(true){
+                r = CODEPOINT_record_next(r[0],r[1]);
+                if(r[0]==-1)break;
+                RECORD.push([r[0],r[1]]);
+            }
+        }
+
+        function CODEPOINT_record_next(row,deep){
+            if(row==-1){
+                row_parts = LINES[0].split("\t");
+                return [0,row_parts.length];
+            }
+
+            if(row>=LINES.length)return [-1,-1];
+            if(LINES[row].trim()=="")return [-1,-1];
+
+            var row_parts = LINES[row].split("\t");
+            if(deep<row_parts.length){
+                return [row,deep+1]
+            }
+            else {
+
+                for(y=1;y<=deep;y++){
+                    var a = getRowPart(row,y);
+                    var b = getRowPart(row+1,y);
+                    if(a==undefined || b == undefined){
+                        return [row+1,y]
+                    }
+                    if(a.Path!=b.Path || a.LN!=b.LN){
+                        return [row+1,y]
+                        break;
+                    }
+                }
+                return [row+1,deep]
+            }
+            //CODEPOINT_goto(1,-1)
+        }
+
+
+
+        function CODEPOINT_next(){
+            var row_parts = LINES[CODEPOINT.row].split("\t");
+            if(CODEPOINT.deep<row_parts.length){
+                console.log("DEEEEEEEEEP")
+                CODEPOINT_goto(CODEPOINT.row,CODEPOINT.deep+1)
+            }
+            else {
+                
+                for(y=1;y<=CODEPOINT.deep;y++){
+                    var a = getRowPart(CODEPOINT.row,y);
+                    var b = getRowPart(CODEPOINT.row+1,y);
+                    if(a==undefined || b == undefined){
+                        CODEPOINT.deep=y;
+                        break;
+                    }
+                    if(a.Path!=b.Path || a.LN!=b.LN){
+                        console.log(a.Path,b.Path)
+                        CODEPOINT.deep=y;
+                        console.log("!!");
+                        console.log("!!");
+                        console.log(LINES[CODEPOINT.row]);
+                        console.log(LINES[CODEPOINT.row+1]);
+                        
+
+                        break;
+                    }
+                }
+
+
+                CODEPOINT_goto(CODEPOINT.row+1,CODEPOINT.deep)
+            }
+            //CODEPOINT_goto(1,-1)
+        }
+
+        function getRowPart(row,partnr){
+            if(row>=LINES.length)return undefined;
+            var row_parts = LINES[row].split("\t");
+            if(partnr<1)return undefined;
+            if(partnr>row_parts.length)return undefined;
+            var str = row_parts[row_parts.length-partnr];
+            if(str.trim()!=""){
+                return JSON.parse(str);
+            }
+            else return undefined;
+        }
+
+        function CODEPOINT_goto(row,dep){
+            CODEPOINT.row = row;
+            var row_parts = LINES[row].split("\t");
+
+            if(dep==-1)dep = row_parts.length
+            if(dep>row_parts.length) dep = row_parts.length;
+            CODEPOINT.deep = dep;
+
+            var jpart0 = JSON.parse(row_parts[row_parts.length-dep]);
+            if(CURRENT_FILE!=jpart0.Path){
+                CURRENT_FILE=jpart0.Path; 
+                displayCode(FILES[CURRENT_FILE]);
+                document.getElementById("file-name").innerText = jpart0.Path;
+            }
+            CURRENT_LINE = jpart0.LN;
+            markCurrentLine(CURRENT_LINE);
+            document.getElementById("data-area").innerText = jpart0.M +" - "+ JSON.stringify(jpart0.P);
+            //console.log(jpart0);
+        }
+
+        function get_files_from(json){
+            if(json.Filedata!==undefined && json.Filedata!=""){
+                FILES[json.Path] = json.Filedata;
+
+            }
+        }
+
+        function get_all_files(){
+            LINES.forEach((line)=>{
+                var parts = line.split("\t");
+                parts.forEach((part)=>{
+                     //console.log(part);
+                     
+                     if(part.trim()!=""){
+                        var json = JSON.parse(part);
+                        get_files_from(json);
+                     }
+                });
+            });
+        }
+
+        
+
+    </script>
+
+
+<script>
+function start_debug(str){
+    LINES = str.split("\n");
+    //console.log(LINES[0]);
+    get_all_files();
+    CODEPOINT_record_all();
+    RECORD_next();
+    //CODEPOINT_start();
+	//console.log(str);
+}
+
+window.onload = function() {
+      var compressedBase64String = document.getElementById("compressed_data").innerText;
+      //console.log(compressedBase64String );
+      unpackString(compressedBase64String)
+       .then(result => start_debug(result))
+       .catch(error => console.error("Error:", error));
+    
+        /*function handleNKeyPress() {
+            CODEPOINT_next();
+            //CODEPOINT_goto(CODEPOINT.row+1);
+            // Add your desired functionality here
+        }*/
+
+        // Add an event listener to the document
+        document.addEventListener('keydown', function(event) {
+            // Check if the pressed key is 'n' (case-insensitive)
+            if (event.key.toLowerCase() === 'm') {
+                RECORD_stepover();
+            }
+
+            if (event.key.toLowerCase() === 'v') {
+                RECORD_stepover_back();
+            }
+            
+            if (event.key.toLowerCase() === 'n') {
+                RECORD_next();
+            }
+            if (event.key.toLowerCase() === 'b') {
+                RECORD_prev();
+            }
+        });
+
+};
+</script>
+
+<div id="compressed_data" style="display:none">

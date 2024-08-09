@@ -2,18 +2,23 @@ package main
 
 import (
 	"fmt"
-//	"io"
+	//	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-//	"errors"
-//	"strings" 
-//	"bytes"
-//	"io/ioutil"
-    "os"
+
+	//	"errors"
+	//	"strings"
+	//	"bytes"
+	//	"io/ioutil"
 	"grp/limits"
 	"grp/middlesitter"
+	"os"
+
+	//	"runtime"
+	//. "grp/ttd"
+	"strings"
 )
 
 const (
@@ -24,7 +29,7 @@ var proxyAddr string
 
 func main() {
 
-	
+	//TTD(1, "Hi", "you", "and", "you")
 
 	apacheURL, err := url.Parse(apacheAddr)
 	if err != nil {
@@ -43,18 +48,22 @@ func main() {
 
 	// Create a custom transport to intercept the response (see middlesitter.go !)
 	proxy.Transport = middlesitter.NewMiddleSitterTransport(http.DefaultTransport)
-	
-	limits.SetupRateLimiters();
-    
+
+	limits.SetupRateLimiters()
+
 	// Start the proxy server
 	proxyAddr = os.Args[1]
 	fmt.Printf("Starting proxy server on %s\n", proxyAddr)
-	log.Fatal(http.ListenAndServe(proxyAddr, proxy))
+
+	if strings.HasSuffix(proxyAddr, "443") {
+		certFile := "/etc/letsencrypt/live/003232.xyz/fullchain.pem"
+		keyFile := "/etc/letsencrypt/live/003232.xyz/privkey.pem"
+		http.ListenAndServeTLS(proxyAddr, certFile, keyFile, proxy)
+	} else {
+		log.Fatal(http.ListenAndServe(proxyAddr, proxy))
+	}
 }
 
 func analyzeRequest(req *http.Request) {
 	fmt.Printf("Received request: %s %s\n", req.Method, req.URL.Path)
 }
-
-
-
