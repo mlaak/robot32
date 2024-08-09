@@ -5,10 +5,14 @@ $FILES_SEEN = [];
 
 function process_json($json){
     global $FILES_SEEN;
+    while(trim($json->Path)=="" && isset($json->Parent))$json = $json->Parent;
+    //echo "Here 2\n";
+    //print_r($json);
 
     if(!isset($FILES_SEEN[$json->Path])){
         $FILES_SEEN[$json->Path] = true;
         if(!isset($json->Filedata) || $json->Filedata==""){
+           
             $json->Filedata = @file_get_contents($json->Path);
         }
     }
@@ -22,7 +26,10 @@ function flatten_json($json){
     $x = 0;
     $arr = [];
     while(true){
-        $next = $json->Parent;
+        //print_r($json);
+
+        if(isset($json->Parent))$next = $json->Parent;
+        else $next = null;
         $json->Parent = null;
         $arr[] = json_encode($json);
         
@@ -37,6 +44,9 @@ function flatten_json($json){
 
 function process_line($num, $line,$gz) {
     $json = json_decode($line);
+    if(trim($json->Path)=="" && isset($json->Parent))$json = $json->Parent;
+    //echo "Here 1\n";
+    //print_r($json);
     process_json($json);
     $jsons = flatten_json($json);
    // $line_out = json_encode($json)."\n";
@@ -114,7 +124,7 @@ if ($handle) {
             die("Error writing to a.txt.");
         }
     }
-
+    fwrite($aFile, "</div></body></html>");
     // Close both files
     fclose($bFile);
     fclose($aFile);

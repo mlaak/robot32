@@ -107,6 +107,7 @@ func (t *MiddleSitterTransport) RoundTrip(req *http.Request) (*http.Response, er
 	})
 
 	req.Header.Add("Ttd", nrc.GetReqCodeStr())
+	req.Header.Add("User-Openrouter-Keys", TTX(c, usersession.GetUserData(c, usertype, iporid, "openrouter_keys")))
 
 	/**/
 	TTD(c, "Forward request to apache") //gofmt:ignore

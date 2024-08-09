@@ -6,10 +6,6 @@ func TTD(rq int64, message string, pars ...interface{}) {
 
 }
 
-func __TTD(rq int64, message string, pars ...interface{}) {
-
-}
-
 func TTDLEV(c int64, lev int64) int64 {
 	return c
 }
