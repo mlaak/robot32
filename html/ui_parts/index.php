@@ -104,6 +104,35 @@
           document.getElementById('sidebar-menu').classList.toggle('hidden');
     });
 
+
+    function checkCredits(displayElement) {
+      // Make sure displayElement is a valid DOM element
+      if (!(displayElement instanceof Element)) {
+        console.error('Invalid display element provided');
+        return;
+      }
+
+      // Make the API call
+      fetch('units/credits_check?no_caching='+Date.now())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(credits => {
+          // Display the credits
+          if(credits=="-1")displayElement.textContent = "";
+          else displayElement.textContent = `Credits: ${credits}`;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          displayElement.textContent = 'Error checking credits';
+        });
+    }
+
+    checkCredits(document.getElementById("credits_display"));
+
     <?php include __DIR__."/js/add-interaction.js"; ?>
     <?php include __DIR__."/js/load-previous-chat.js"; ?> 
     <?php include __DIR__."/js/run-message.js"; ?> 

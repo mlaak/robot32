@@ -74,10 +74,13 @@ $headers = [
 $ai = new GPTlib($URL,$headers,TRUE);
 $ai->setHistory(TTX($_REQUEST["history"] ?? null));
 
+
+
+
 $options = [
-    "temperature"=> 1,
-    "max_tokens"=> 8000,
-    "top_p"=> 1,
+    "temperature"=> ($_REQUEST["llm_temp"] ?? 1)*1.0,
+    "max_tokens"=> ($_REQUEST["llm_max_tokens"] ?? 8000)*1.0,
+    "top_p"=> ($_REQUEST["llm_top_p"] ?? 1)*1.0,
     "stream"=> true,
     "stop"=> null
     ];

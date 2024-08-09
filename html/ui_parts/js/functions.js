@@ -84,3 +84,17 @@ async function encryptText(txt,secretKey){
 
   return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
 }
+
+function getSelectBoxValue(id) {
+  let selectBox = document.getElementById(id);
+  let selectedValue = selectBox.options[selectBox.selectedIndex].value;
+  return selectedValue;
+}
+
+function deleteAllLLMInteractions(){
+  var elements = document.querySelectorAll('.llm_interaction');
+  // Loop through the elements and remove them from the DOM
+  for (var i = 0; i < elements.length; i++) {
+    elements[i].remove();
+  }
+}

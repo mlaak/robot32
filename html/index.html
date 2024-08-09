@@ -146,6 +146,13 @@ document.addEventListener('keydown', function(event) {
     
     <a href="#" id="more-options-link" class="block text-blue-500 dark:text-blue-300 mt-2 ml-4">More options >></a>
       <div id="more-options" class="hidden mt-2 space-y-2 ml-4">
+        <button class="p-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg w-full md:w-auto" onclick="deleteAllLLMInteractions()">Clear board</button>
+        <select style="height: 43px;" class="text-lg rounded-md" id = "illustrator_choice">
+          <option value="default">Illustrator: default</option>
+          <option value="realistic">Illustrator: realistic</option>
+          <option value="funny">Illustrator: funny</option>
+        </select>
+        <!--
         <label class="flex items-center space-x-2" id="option1-label">
           <input type="checkbox" class="form-checkbox text-blue-500 dark:text-blue-300" id="option1-checkbox" />
           <span class="text-zinc-800 dark:text-zinc-200">Option 1</span>
@@ -158,6 +165,7 @@ document.addEventListener('keydown', function(event) {
           <input type="checkbox" class="form-checkbox text-blue-500 dark:text-blue-300" id="option3-checkbox" />
           <span class="text-zinc-800 dark:text-zinc-200">Option 3</span>
         </label>
+        -->
       </div>
       
     <script>
@@ -200,17 +208,64 @@ Image generation is based on open source model Stable Diffusion Turbo (v1.5/XL)
     
     
     <div id="parameters-section" class="md:flex-none md:w-48 bg-white dark:bg-zinc-800 shadow-md p-4 space-y-4">
-        <div class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
+        <div id="credits_display" >
+</div>
+<div style="margin-top:0px" class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
     <div style="color:gray" class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Parameters</div>
     <svg class="w-4 h-4 ml-1 transform transition duration-200" id="parameters-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
 </div>
-<ul class="hidden space-y-2" id="parameters-list">
-    <li>Parameter 1</li>
-    <li>Parameter 2</li>
-    <li>Parameter 3</li>
+<div style="margin-top: 0px;" class="justify-center flex">
+<ul style="margin-top: 0px;" class="hidden " id="parameters-list">
+    <li>
+        <select id="llm_temp">
+          <option value="0.0">Temp 0.0</option>
+          <option value="0.2">Temp 0.2</option>
+          <option value="0.4">Temp 0.4</option>
+          <option value="0.6">Temp 0.6</option>
+          <option value="0.8">Temp 0.8</option>
+          <option value="1.0" selected>Temp 1.0</option>
+          <option value="1.2">Temp 1.2</option>
+          <option value="1.4">Temp 1.4</option>
+          <option value="1.6">Temp 1.6</option>
+          <option value="1.8">Temp 1.8</option>
+          <option value="2.0">Temp 2.0</option>
+        </select>
+    </li>
+   
+    <li>
+      <select id = "llm_top_p">
+        <option value="0.0">Top-P 0.0</option>
+        <option value="0.1">Top-P 0.1</option>
+        <option value="0.2">Top P 0.2</option>
+        <option value="0.3">Top P 0.3</option>
+        <option value="0.4">Top P 0.4</option>
+        <option value="0.5">Top P 0.5</option>
+        <option value="0.6">Top P 0.6</option>
+        <option value="0.7">Top P 0.7</option>
+        <option value="0.8">Top P 0.8</option>
+        <option value="0.9">Top P 0.9</option>
+        <option value="1.0" selected>Top P 1.0</option>
+      </select>
+  </li>
+
+  <li>
+    <select id = "llm_max_tokens">
+      <option value="100">Max 100 tokens</option>
+      <option value="200">Max 200 tokens</option>
+      <option value="400">Max 400 tokens</option>
+      <option value="800">Max 800 tokens</option>
+      <option value="1600">Max 1600 tkns</option>
+      <option value="3200" selected>Max 3200 tkns</option>
+      <option value="6400">Max 6400 tkns</option>
+      <option value="12800">Max 12800 tkn</option>
+    
+    </select>
+</li>
+
 </ul>
+</div>
 
 
 <script>
@@ -466,6 +521,19 @@ async function encryptText(txt,secretKey){
   return JSON.stringify({"iv":Array.from(iv),"encrypted":Array.from(new Uint8Array(encryptedData))});
 }
 
+function getSelectBoxValue(id) {
+  let selectBox = document.getElementById(id);
+  let selectedValue = selectBox.options[selectBox.selectedIndex].value;
+  return selectedValue;
+}
+
+function deleteAllLLMInteractions(){
+  var elements = document.querySelectorAll('.llm_interaction');
+  // Loop through the elements and remove them from the DOM
+  for (var i = 0; i < elements.length; i++) {
+    elements[i].remove();
+  }
+}
     if(!checkCookieExists('r_ression_id')){
         window.location.href="login.html";
     }
@@ -488,6 +556,35 @@ async function encryptText(txt,secretKey){
     document.getElementById('sidebar-toggle').addEventListener('click', () => {
           document.getElementById('sidebar-menu').classList.toggle('hidden');
     });
+
+
+    function checkCredits(displayElement) {
+      // Make sure displayElement is a valid DOM element
+      if (!(displayElement instanceof Element)) {
+        console.error('Invalid display element provided');
+        return;
+      }
+
+      // Make the API call
+      fetch('units/credits_check?no_caching='+Date.now())
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.text();
+        })
+        .then(credits => {
+          // Display the credits
+          if(credits=="-1")displayElement.textContent = "";
+          else displayElement.textContent = `Credits: ${credits}`;
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          displayElement.textContent = 'Error checking credits';
+        });
+    }
+
+    checkCredits(document.getElementById("credits_display"));
 
     function template(name,...replaces){ 
     var s = document.getElementById(name).innerHTML;
@@ -698,11 +795,20 @@ function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
     let history_str = "";
     let llm_response = "";
 
+    //TODO: make this more sane (function should probably take these in as parameters)
+    var llm_temp = getSelectBoxValue("llm_temp");
+    var llm_top_p = getSelectBoxValue("llm_top_p");
+    var llm_max_tokens = getSelectBoxValue("llm_max_tokens");
+
+
     if(history!=null){
         history_str = "&history="+encodeURIComponent(JSON.stringify(history));
     }
-    fetch(llm_url+'&content='+encodeURIComponent(message)+history_str,{credentials: "same-origin"})
+    fetch(llm_url+'&content='+encodeURIComponent(message)+history_str+"&llm_temp="+llm_temp+"&llm_top_p="+llm_top_p+"&llm_max_tokens="+llm_max_tokens , {credentials: "same-origin"})
       .then(response => {
+
+        checkCredits(document.getElementById("credits_display"));
+
         if (!response.ok) {
             if(response.status==498){
                 window.location.href="login.html";
@@ -782,7 +888,7 @@ function run_message(message){
     messageBox.style.height = 'auto';
     messageBox.style.height = messageBox.scrollHeight + 'px';
     
-    fetch('experts/illustrator?content='+encodeURIComponent(message),{credentials: "same-origin"})
+    fetch('experts/illustrator?content='+encodeURIComponent(message)+"&illustrator_choice="+getSelectBoxValue("illustrator_choice"),{credentials: "same-origin"})
       .then(response => {
         var imgdata = response.headers.get("Return-Image");
         document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;

@@ -26,11 +26,20 @@ function run_llm_query(llm_url,parent_req_no,message,history,gpt_text_elem){
     let history_str = "";
     let llm_response = "";
 
+    //TODO: make this more sane (function should probably take these in as parameters)
+    var llm_temp = getSelectBoxValue("llm_temp");
+    var llm_top_p = getSelectBoxValue("llm_top_p");
+    var llm_max_tokens = getSelectBoxValue("llm_max_tokens");
+
+
     if(history!=null){
         history_str = "&history="+encodeURIComponent(JSON.stringify(history));
     }
-    fetch(llm_url+'&content='+encodeURIComponent(message)+history_str,{credentials: "same-origin"})
+    fetch(llm_url+'&content='+encodeURIComponent(message)+history_str+"&llm_temp="+llm_temp+"&llm_top_p="+llm_top_p+"&llm_max_tokens="+llm_max_tokens , {credentials: "same-origin"})
       .then(response => {
+
+        checkCredits(document.getElementById("credits_display"));
+
         if (!response.ok) {
             if(response.status==498){
                 window.location.href="login.html";
@@ -110,7 +119,7 @@ function run_message(message){
     messageBox.style.height = 'auto';
     messageBox.style.height = messageBox.scrollHeight + 'px';
     
-    fetch('experts/illustrator?content='+encodeURIComponent(message),{credentials: "same-origin"})
+    fetch('experts/illustrator?content='+encodeURIComponent(message)+"&illustrator_choice="+getSelectBoxValue("illustrator_choice"),{credentials: "same-origin"})
       .then(response => {
         var imgdata = response.headers.get("Return-Image");
         document.getElementById("gpt-image-"+reqno).src = "data:image/jpeg;base64,"+imgdata;

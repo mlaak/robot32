@@ -1,14 +1,61 @@
-<div class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
+<div id="credits_display" >
+</div>
+<div style="margin-top:0px" class="flex justify-center items-center cursor-pointer" onclick="toggleParameters()">
     <div style="color:gray" class="text-lg font-semibold text-zinc-800 dark:text-zinc-200">Parameters</div>
     <svg class="w-4 h-4 ml-1 transform transition duration-200" id="parameters-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
     </svg>
 </div>
-<ul class="hidden space-y-2" id="parameters-list">
-    <li>Parameter 1</li>
-    <li>Parameter 2</li>
-    <li>Parameter 3</li>
+<div style="margin-top: 0px;" class="justify-center flex">
+<ul style="margin-top: 0px;" class="hidden " id="parameters-list">
+    <li>
+        <select id="llm_temp">
+          <option value="0.0">Temp 0.0</option>
+          <option value="0.2">Temp 0.2</option>
+          <option value="0.4">Temp 0.4</option>
+          <option value="0.6">Temp 0.6</option>
+          <option value="0.8">Temp 0.8</option>
+          <option value="1.0" selected>Temp 1.0</option>
+          <option value="1.2">Temp 1.2</option>
+          <option value="1.4">Temp 1.4</option>
+          <option value="1.6">Temp 1.6</option>
+          <option value="1.8">Temp 1.8</option>
+          <option value="2.0">Temp 2.0</option>
+        </select>
+    </li>
+   
+    <li>
+      <select id = "llm_top_p">
+        <option value="0.0">Top-P 0.0</option>
+        <option value="0.1">Top-P 0.1</option>
+        <option value="0.2">Top P 0.2</option>
+        <option value="0.3">Top P 0.3</option>
+        <option value="0.4">Top P 0.4</option>
+        <option value="0.5">Top P 0.5</option>
+        <option value="0.6">Top P 0.6</option>
+        <option value="0.7">Top P 0.7</option>
+        <option value="0.8">Top P 0.8</option>
+        <option value="0.9">Top P 0.9</option>
+        <option value="1.0" selected>Top P 1.0</option>
+      </select>
+  </li>
+
+  <li>
+    <select id = "llm_max_tokens">
+      <option value="100">Max 100 tokens</option>
+      <option value="200">Max 200 tokens</option>
+      <option value="400">Max 400 tokens</option>
+      <option value="800">Max 800 tokens</option>
+      <option value="1600">Max 1600 tkns</option>
+      <option value="3200" selected>Max 3200 tkns</option>
+      <option value="6400">Max 6400 tkns</option>
+      <option value="12800">Max 12800 tkn</option>
+    
+    </select>
+</li>
+
 </ul>
+</div>
 
 
 <script>

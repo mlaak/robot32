@@ -3,10 +3,20 @@ require __DIR__."/settings.php";
 require __DIR__."/vendor/Robot32lib/Middleware/Middleware.php";
 require __DIR__."/vendor/autoload.php";
 use Robot32lib\ImageSource\ImageSource; 
+declare(ticks=1);
 
 $use_falai = true;
 $falai_error = false;
 $content = $_REQUEST["content"];
+
+$illustrator_choice = $_REQUEST["illustrator_choice"] ?? "default";
+if($illustrator_choice == "realistic"){
+    $content = TTX("Realistic lifelike photo: ".$content);
+}
+else if($illustrator_choice == "funny"){
+    $content = TTX("Funny comedic picture, caricature: ".$content);
+}
+
 
 if(isset($_REQUEST["prerendered"]))$use_falai = false;
 if(!$FAL_KEY && trim($FAL_KEY)==="")$use_falai = false; 
